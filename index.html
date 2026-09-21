@@ -17,7 +17,12 @@ button{border:1px solid #49e5ff77;background:#103654;color:white;border-radius:1
 <canvas id="c"></canvas>
 <div id="start"><div class="box"><div style="font-size:60px">🧑‍💻⚡</div><h1>CYBER RUNNER</h1><p>Collect 5 encrypted data chips, hack the terminal, then escape through the portal. Security bots are slow, but they are persistent. 🤖</p><p>Use WASD/arrow keys or the touch controls.</p><button onclick="begin()">▶ PLAY</button></div></div>
 <div id="end" class="hidden"><div class="box"><div id="ei" style="font-size:60px">🏆</div><h1 id="et">MISSION COMPLETE</h1><p id="ed"></p><button onclick="begin()">🔄 PLAY AGAIN</button></div></div>
-<div id="controls"><div class="pad"><button class="c u" data-k="u">▲</button><button class="c l" data-k="l">◀</button><button class="c d" data-k="d">▼</button><button class="c r" data-k="r">▶</button></div></div>
+<div id="controls"><div class="pad">
+<button class="c u" data-k="u" aria-label="Up">▲</button>
+<button class="c l" data-k="l" aria-label="Left">◀</button>
+<button class="c d" data-k="d" aria-label="Down">▼</button>
+<button class="c r" data-k="r" aria-label="Right">▶</button>
+</div></div>
 <script>
 const cv=document.getElementById('c'),x=cv.getContext('2d');let W,H,D,run=false,last=0,score=0,hp=100,got=0,hack=false;
 const k={u:0,d:0,l:0,r:0};let p,bots,chips,walls,term,exit;
