@@ -6,7 +6,8 @@
 <title>Cyber Quest - Beginner Edition</title>
 <style>
 body{font-family:Arial,sans-serif;background:#111;color:#fff;text-align:center;margin:0;padding:25px}
-h1{color:#0ff;text-shadow:0 0 12px #0ff} h2{color:#7df}
+h1{color:#0ff;text-shadow:0 0 12px #0ff;font-size:clamp(32px,7vw,56px);margin:10px 0 20px}
+h2{color:#7df}
 button{margin:8px;padding:11px 20px;font-size:16px;cursor:pointer;border:0;border-radius:8px;background:#087fda;color:#fff}
 button:hover{filter:brightness(1.2)} input{padding:10px;border-radius:7px;border:1px solid #555;font-size:16px}
 #menu{max-width:800px;margin:0 auto 20px}
@@ -15,12 +16,11 @@ button:hover{filter:brightness(1.2)} input{padding:10px;border-radius:7px;border
 .card{display:inline-block;width:70px;height:70px;margin:8px;font-size:22px}
 #reactionBox{position:relative;width:320px;height:210px;margin:15px auto;background:#222;border-radius:12px}
 #colorBox{width:120px;height:120px;margin:15px auto;border-radius:15px}
-.hidden{display:none}
-.back{background:#555}
+.hidden{display:none}.back{background:#555}
 </style>
 </head>
 <body>
-<h1 id="mainTitle">🛡️ Cyber Quest</h1>
+<h1 id="mainTitle">🛡️ CYBER QUEST</h1>
 <div id="menu">
 <p>Select a game to play:</p>
 <button onclick="startPhishing()">🎣 Phishing Detective</button>
@@ -34,8 +34,8 @@ button:hover{filter:brightness(1.2)} input{padding:10px;border-radius:7px;border
 <script>
 let totalScore=0,gamesPlayed=[];
 const area=()=>document.getElementById("gameArea");
-function enterGame(){document.getElementById("menu").classList.add("hidden");document.getElementById("mainTitle").classList.add("hidden");}
-function exitGame(){document.getElementById("menu").classList.remove("hidden");document.getElementById("mainTitle").classList.remove("hidden");area().innerHTML="<p>Choose a game to begin!</p>";}
+function enterGame(){document.getElementById("menu").classList.add("hidden");}
+function exitGame(){document.getElementById("menu").classList.remove("hidden");area().innerHTML="<p>Choose a game to begin!</p>";}
 function backButton(){return '<br><button class="back" onclick="exitGame()">← Back to Games</button>';}
 function updateScore(p){totalScore+=p;document.getElementById("scoreBoard").textContent="Total Score: "+totalScore;}
 function markGamePlayed(n){if(!gamesPlayed.includes(n))gamesPlayed.push(n);}
