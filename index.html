@@ -21,8 +21,21 @@ button{border:1px solid #49e5ff77;background:#103654;color:white;border-radius:1
 <script>
 const cv=document.getElementById('c'),x=cv.getContext('2d');let W,H,D,run=false,last=0,score=0,hp=100,got=0,hack=false;
 const k={u:0,d:0,l:0,r:0};let p,bots,chips,walls,term,exit;
+function setKey(key,on){k[key]=on}
+function bindControls(){
+ document.querySelectorAll('[data-k]').forEach(b=>{
+   const key=b.dataset.k;
+   const down=e=>{e.preventDefault();e.stopPropagation();setKey(key,1);b.setPointerCapture?.(e.pointerId)};
+   const up=e=>{e.preventDefault();e.stopPropagation();setKey(key,0)};
+   b.addEventListener('pointerdown',down,{passive:false});
+   b.addEventListener('pointerup',up,{passive:false});
+   b.addEventListener('pointercancel',up,{passive:false});
+   b.addEventListener('lostpointercapture',up,{passive:false});
+ });
+}
+bindControls();
 function size(){D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;x.setTransform(D,0,0,D,0,0)}addEventListener('resize',size);size();
-function begin(){document.getElementById('start').classList.add('hidden');document.getElementById('end').classList.add('hidden');score=0;hp=100;got=0;hack=false;p={x:70,y:H-90,r:16,s:210};chips=[[W*.22,H*.22],[W*.47,H*.18],[W*.75,H*.27],[W*.29,H*.58],[W*.68,H*.68]].map(q=>({x:q[0],y:q[1],r:10}));bots=[{x:W*.8,y:H*.2,r:17,s:42},{x:W*.52,y:H*.5,r:17,s:36}];walls=[{x:W*.15,y:H*.38,w:W*.25,h:18},{x:W*.57,y:H*.42,w:W*.27,h:18},{x:W*.42,y:H*.67,w:18,h:H*.2}];term={x:W*.86,y:H*.52,r:25};exit={x:55,y:75,r:24};run=true;last=performance.now();requestAnimationFrame(loop)}
+function begin(){Object.keys(k).forEach(q=>k[q]=0);document.getElementById('start').classList.add('hidden');document.getElementById('end').classList.add('hidden');score=0;hp=100;got=0;hack=false;p={x:70,y:H-90,r:16,s:210};chips=[[W*.22,H*.22],[W*.47,H*.18],[W*.75,H*.27],[W*.29,H*.58],[W*.68,H*.68]].map(q=>({x:q[0],y:q[1],r:10}));bots=[{x:W*.8,y:H*.2,r:17,s:42},{x:W*.52,y:H*.5,r:17,s:36}];walls=[{x:W*.15,y:H*.38,w:W*.25,h:18},{x:W*.57,y:H*.42,w:W*.27,h:18},{x:W*.42,y:H*.67,w:18,h:H*.2}];term={x:W*.86,y:H*.52,r:25};exit={x:55,y:75,r:24};run=true;last=performance.now();requestAnimationFrame(loop)}
 function hitRect(o,nx,ny){if(nx<o.r||nx>W-o.r||ny<o.r+42||ny>H-o.r)return true;let q={x:nx,y:ny,r:o.r};return walls.some(r=>{let a=Math.max(r.x,Math.min(q.x,r.x+r.w)),b=Math.max(r.y,Math.min(q.y,r.y+r.h));return Math.hypot(q.x-a,q.y-b)<q.r})}
 function move(dt){let dx=k.r-k.l,dy=k.d-k.u;if(!dx&&!dy)return;let z=Math.hypot(dx,dy);dx/=z;dy/=z;let nx=p.x+dx*p.s*dt,ny=p.y+dy*p.s*dt;if(!hitRect(p,nx,p.y))p.x=nx;if(!hitRect(p,p.x,ny))p.y=ny}
 function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
@@ -35,6 +48,8 @@ function draw(){x.fillStyle='#06101c';x.fillRect(0,0,W,H);x.strokeStyle='#123047
 function loop(t){if(!run)return;let dt=Math.min(.035,(t-last)/1000);last=t;update(dt);draw();requestAnimationFrame(loop)}
 function finish(win){document.getElementById('end').classList.remove('hidden');document.getElementById('ei').textContent=win?'🏆':'💥';document.getElementById('et').textContent=win?'NETWORK SAVED!':'SYSTEM BREACHED';document.getElementById('ed').textContent=win?'You hacked the terminal and escaped with '+score+' points! 🛡️':'The bots caught you. Final score: '+score+'. Try again!'}
 addEventListener('keydown',e=>{let a=e.key.toLowerCase();if(a==='w'||a==='arrowup')k.u=1;if(a==='s'||a==='arrowdown')k.d=1;if(a==='a'||a==='arrowleft')k.l=1;if(a==='d'||a==='arrowright')k.r=1;if(a==='h')hack=true});
+addEventListener('blur',()=>Object.keys(k).forEach(q=>k[q]=0));
+addEventListener('pointercancel',()=>Object.keys(k).forEach(q=>k[q]=0));
 addEventListener('keyup',e=>{let a=e.key.toLowerCase();if(a==='w'||a==='arrowup')k.u=0;if(a==='s'||a==='arrowdown')k.d=0;if(a==='a'||a==='arrowleft')k.l=0;if(a==='d'||a==='arrowright')k.r=0;if(a==='h')hack=false});
-document.querySelectorAll('[data-k]').forEach(b=>{let q=b.dataset.k;b.onpointerdown=e=>{e.preventDefault();k[q]=1};b.onpointerup=b.onpointercancel=b.onpointerleave=e=>{e.preventDefault();k[q]=0}});
+
 </script></body></html>
