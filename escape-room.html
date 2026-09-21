@@ -1,0 +1,49 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Escape Room</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#17120d;color:#fff;font-family:Arial,sans-serif;touch-action:none}
+canvas{display:block;width:100%;height:100%}
+#hud{position:fixed;top:10px;left:10px;right:10px;z-index:5;display:flex;justify-content:space-between;gap:7px;font-weight:bold;font-size:13px}
+.p{background:#211a12dd;border:1px solid #e5bb6755;border-radius:18px;padding:8px 11px}
+#hint{position:fixed;top:56px;left:50%;transform:translateX(-50%);z-index:5;background:#1d160fdd;border:1px solid #e5bb6755;border-radius:15px;padding:8px 14px;text-align:center;max-width:90%;font-size:13px}
+#start,#end{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:#090704f2;padding:20px;text-align:center}
+.box{max-width:530px;padding:28px;border:1px solid #e5bb6755;border-radius:25px;background:#19120c;box-shadow:0 0 60px #e6ad3b18}
+h1{font-size:clamp(34px,9vw,58px);margin:7px 0;color:#ffd77c}p{color:#ddd0bd;line-height:1.5}
+button{border:1px solid #f0c96d77;background:#4a351b;color:#fff;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:bold}
+#controls{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:10}
+.pad{display:grid;grid-template-columns:58px 58px 58px;grid-template-rows:58px 58px;gap:7px}
+.c{width:58px;height:58px;padding:0;background:#3a2a18dd;font-size:23px}.u{grid-column:2}.l{grid-column:1;grid-row:2}.d{grid-column:2;grid-row:2}.r{grid-column:3;grid-row:2}
+.hidden{display:none!important}
+</style></head><body>
+<div id="hud"><div class="p">❤️ <span id="life">3</span></div><div class="p">🔎 <span id="items">0</span>/4</div><div class="p">🔢 Code: <span id="code">_ _ _ _</span></div></div>
+<div id="hint">Find the 4 clues hidden around the room.</div><canvas id="c"></canvas>
+<div id="start"><div class="box"><div style="font-size:64px">🔐🗝️</div><h1>ESCAPE ROOM</h1><p>You are locked inside an old study. Find four clues, discover the four-digit code, unlock the safe, take the key, and escape through the door.</p><p>Walk into objects to investigate them. Wrong code attempts cost a life.</p><button onclick="begin()">▶ ENTER ROOM</button></div></div>
+<div id="end" class="hidden"><div class="box"><div id="ei" style="font-size:60px">🏆</div><h1 id="et">YOU ESCAPED!</h1><p id="ed"></p><button onclick="begin()">🔄 PLAY AGAIN</button></div></div>
+<div id="controls"><div class="pad"><button class="c u" data-k="u">▲</button><button class="c l" data-k="l">◀</button><button class="c d" data-k="d">▼</button><button class="c r" data-k="r">▶</button></div></div>
+<script>
+const cv=document.getElementById('c'),x=cv.getContext('2d');let W,H,D,run=false,last=0,lives=3,found=0,hasKey=false,open=false;const k={u:0,d:0,l:0,r:0};let p,clues,safe,door,walls;
+function size(){D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;x.setTransform(D,0,0,D,0,0)}addEventListener('resize',size);size();
+document.querySelectorAll('[data-k]').forEach(b=>{let q=b.dataset.k;const d=e=>{e.preventDefault();k[q]=1;b.setPointerCapture?.(e.pointerId)};const u=e=>{e.preventDefault();k[q]=0};b.addEventListener('pointerdown',d);b.addEventListener('pointerup',u);b.addEventListener('pointercancel',u);b.addEventListener('lostpointercapture',u)});
+function begin(){Object.keys(k).forEach(q=>k[q]=0);lives=3;found=0;hasKey=false;open=false;document.getElementById('start').classList.add('hidden');document.getElementById('end').classList.add('hidden');
+p={x:70,y:H-85,r:15,s:195};clues=[{x:W*.2,y:H*.22,n:'7',seen:false,label:'Painting clue'},{x:W*.72,y:H*.22,n:'3',seen:false,label:'Bookshelf clue'},{x:W*.24,y:H*.62,n:'9',seen:false,label:'Clock clue'},{x:W*.67,y:H*.64,n:'1',seen:false,label:'Desk clue'}];
+safe={x:W*.5,y:H*.25,r:27};door={x:W-55,y:H-85,r:27};walls=[{x:W*.35,y:H*.44,w:W*.3,h:18},{x:W*.08,y:H*.39,w:18,h:H*.24},{x:W*.82,y:H*.38,w:18,h:H*.25}];
+last=performance.now();run=true;setHint('Find the 4 clues hidden around the room.');requestAnimationFrame(loop)}
+function blocked(o,nx,ny){if(nx<o.r||nx>W-o.r||ny<o.r+45||ny>H-o.r)return true;return walls.some(r=>{let a=Math.max(r.x,Math.min(nx,r.x+r.w)),b=Math.max(r.y,Math.min(ny,r.y+r.h));return Math.hypot(nx-a,ny-b)<o.r})}
+function move(dt){let dx=k.r-k.l,dy=k.d-k.u;if(!dx&&!dy)return;let z=Math.hypot(dx,dy);dx/=z;dy/=z;let nx=p.x+dx*p.s*dt,ny=p.y+dy*p.s*dt;if(!blocked(p,nx,p.y))p.x=nx;if(!blocked(p,p.x,ny))p.y=ny}
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+function setHint(t){document.getElementById('hint').textContent=t}
+function interact(){clues.forEach(q=>{if(!q.seen&&dist(p,q)<42){q.seen=true;found++;setHint('🧩 '+q.label+': the digit is '+q.n+'.');document.getElementById('code').textContent=clues.map(a=>a.seen?a.n:'_').join(' ')}});if(dist(p,safe)<55&&!open){if(found<4){setHint('🔒 The safe needs all 4 clues first.');return}let entry=prompt('Enter the 4-digit code:');if(entry!==null){if(entry.trim()==='7391'){open=true;hasKey=true;setHint('🗝️ Correct! You found the key. Reach the exit door!');}else{lives--;setHint('❌ Wrong code. One life lost.');if(lives<=0){run=false;finish(false)}}}}if(dist(p,door)<55){if(hasKey){run=false;finish(true)}else setHint('🚪 Locked. Find the key inside the safe.')}} 
+function update(dt){move(dt);interact();document.getElementById('life').textContent=lives;document.getElementById('items').textContent=found}
+function draw(){x.fillStyle='#17120d';x.fillRect(0,0,W,H);x.fillStyle='#241a10';x.fillRect(0,45,W,H-45);
+x.strokeStyle='#3b2b1b';for(let a=0;a<W;a+=38){x.beginPath();x.moveTo(a,45);x.lineTo(a,H);x.stroke()}for(let a=45;a<H;a+=38){x.beginPath();x.moveTo(0,a);x.lineTo(W,a);x.stroke()}
+walls.forEach(r=>{x.fillStyle='#4a321c';x.fillRect(r.x,r.y,r.w,r.h)});
+x.fillStyle=open?'#4b9b68':'#61451f';x.beginPath();x.arc(safe.x,safe.y,safe.r,0,7);x.fill();x.fillStyle='#fff';x.font='23px Arial';x.textAlign='center';x.textBaseline='middle';x.fillText(open?'🗝️':'🔐',safe.x,safe.y);
+clues.forEach((q,i)=>{if(!q.seen){x.fillStyle='#d9b45f';x.fillRect(q.x-15,q.y-12,30,24);x.fillStyle='#24190d';x.font='14px Arial';x.fillText('CLUE',q.x,q.y)}});
+x.fillStyle=hasKey?'#4da66d':'#6d342b';x.beginPath();x.arc(door.x,door.y,door.r,0,7);x.fill();x.fillStyle='#fff';x.fillText(hasKey?'🚪':'🔒',door.x,door.y);
+x.fillStyle='#ffd77c';x.shadowBlur=15;x.shadowColor='#e5b54e';x.beginPath();x.arc(p.x,p.y,p.r,0,7);x.fill();x.shadowBlur=0;x.fillStyle='#fff';x.fillText('🧑',p.x,p.y)}
+function loop(t){if(!run)return;let dt=Math.min(.035,(t-last)/1000);last=t;update(dt);draw();requestAnimationFrame(loop)}
+function finish(win){document.getElementById('end').classList.remove('hidden');document.getElementById('ei').textContent=win?'🏆':'💀';document.getElementById('et').textContent=win?'YOU ESCAPED!':'LOCKED IN';document.getElementById('ed').textContent=win?'You solved the clues, opened the safe and escaped the room! 🎉':'You ran out of lives. The room remains locked...';}
+addEventListener('keydown',e=>{let a=e.key.toLowerCase();if(a==='w'||a==='arrowup')k.u=1;if(a==='s'||a==='arrowdown')k.d=1;if(a==='a'||a==='arrowleft')k.l=1;if(a==='d'||a==='arrowright')k.r=1});
+addEventListener('keyup',e=>{let a=e.key.toLowerCase();if(a==='w'||a==='arrowup')k.u=0;if(a==='s'||a==='arrowdown')k.d=0;if(a==='a'||a==='arrowleft')k.l=0;if(a==='d'||a==='arrowright')k.r=0});addEventListener('blur',()=>Object.keys(k).forEach(q=>k[q]=0));
+</script></body></html>
