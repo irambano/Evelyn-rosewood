@@ -1,206 +1,40 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cyber Quest — Beginner Edition</title>
-  <style>
-    :root { color-scheme: dark; --cyan: #6ef7ff; --violet: #c59bff; --coral: #ff9f9f; --ink: #09102b; --panel: rgba(13, 24, 58, .88); }
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; padding: 40px 18px; font-family: Arial, sans-serif; color: #f7f5ff; text-align: center; background: radial-gradient(circle at 12% 5%, #195ba6 0, transparent 30%), radial-gradient(circle at 88% 15%, #8a367c 0, transparent 27%), radial-gradient(circle at 50% 100%, #153c72 0, transparent 35%), linear-gradient(140deg, #080c25, #121447 50%, #170f35); }
-    body::before { content: ''; position: fixed; inset: 0; z-index: -1; opacity: .18; background-image: linear-gradient(rgba(110,247,255,.26) 1px, transparent 1px), linear-gradient(90deg, rgba(197,155,255,.22) 1px, transparent 1px); background-size: 38px 38px; mask-image: linear-gradient(to bottom, #000, transparent 78%); }
-    main { width: min(760px, 100%); margin: auto; }
-    .hero { padding: 28px 20px 20px; border: 1px solid rgba(110,247,255,.62); border-radius: 24px; background: linear-gradient(130deg, rgba(20, 67, 132, .9), rgba(107, 38, 119, .82)); box-shadow: 0 0 42px rgba(83, 212, 255, .27), inset 0 1px 0 rgba(255,255,255,.18); }
-    .eyebrow { margin: 0 0 8px; color: #ffe0a3; font-size: 12px; font-weight: bold; letter-spacing: 2px; }
-    h1 { margin: 0; color: #fff; font-size: clamp(32px, 8vw, 52px); letter-spacing: 1px; text-shadow: 0 0 25px #4befff, 0 0 42px rgba(197,155,255,.5); }
-    .subtitle { margin: 10px 0 0; color: #eae0ff; font-size: 17px; }
-    .menu, #gameArea, #scoreBoard { margin-top: 20px; padding: 22px; border: 1px solid rgba(174, 185, 255, .36); border-radius: 20px; background: var(--panel); box-shadow: 0 14px 36px rgba(0,0,0,.26); backdrop-filter: blur(12px); }
-    .menu > p { margin-top: 0; color: #d9e1ff; }
-    button { margin: 6px; padding: 12px 17px; border: 1px solid rgba(255,255,255,.65); border-radius: 11px; color: #15112d; font-size: 15px; font-weight: bold; cursor: pointer; background: linear-gradient(135deg, #74efff, #b99aff 58%, #ffb4b4); box-shadow: 0 5px 0 #5953a7, 0 9px 18px rgba(146, 100, 255, .3); transition: transform .15s, box-shadow .15s, filter .15s; }
-    button:hover { filter: saturate(1.18) brightness(1.1); transform: translateY(-2px); box-shadow: 0 7px 0 #5953a7, 0 12px 22px rgba(146, 100, 255, .4); }
-    button:active { transform: translateY(3px); box-shadow: 0 2px 0 #5953a7; }
-    input { width: min(260px, 100%); padding: 12px; border: 2px solid var(--cyan); border-radius: 11px; outline: none; color: #fff; font-size: 16px; background: #101b43; }
-    input:focus { box-shadow: 0 0 0 4px rgba(98,246,255,.18); }
-    #gameArea { min-height: 190px; display: grid; place-content: center; }
-    #gameArea h2 { margin-top: 0; color: var(--cyan); text-shadow: 0 0 13px rgba(98,246,255,.5); }
-    #gameArea p { max-width: 570px; line-height: 1.55; }
-    #scoreBoard { color: #9fffc0; font-size: 19px; font-weight: bold; border-color: rgba(126,255,188,.5); background: rgba(10, 48, 57, .78); }
-    .notice { min-height: 26px; color: #ffe39b; font-weight: bold; }
-    .card { min-width: 92px; min-height: 62px; font-size: 22px; background: linear-gradient(135deg, #ffb6bd, #b99aff, #74efff); }
-    .card.revealed { background: #b6ffff; }
-    @media (max-width: 520px) { body { padding: 20px 12px; } .hero { padding: 23px 13px 17px; } .menu, #gameArea, #scoreBoard { padding: 16px 10px; } button { width: calc(100% - 12px); margin: 6px; } .card { width: calc(31% - 10px); min-width: 0; } }
-  </style>
-</head>
-<body>
-  <main>
-    <header class="hero">
-      <p class="eyebrow">✦ TRAIN • PLAY • PROTECT ✦</p>
-      <h1>Cyber Quest</h1>
-      <p class="subtitle">Beginner Cybersecurity Games</p>
-    </header>
-    <section class="menu" aria-label="Game selection">
-      <p>Select a game to play:</p>
-      <button onclick="startPhishing()">Phishing Detective</button>
-      <button onclick="startIncident()">Incident Response</button>
-      <button onclick="startQuiz()">Network Defender Quiz</button>
-      <button onclick="startEscape()">Cyber Escape Room</button>
-      <button onclick="showLeaderboard()">Show Leaderboard</button>
-    </section>
-    <section id="gameArea" aria-live="polite"><p>Choose a mission to begin.</p></section>
-    <div id="scoreBoard">Total Score: 0</div>
-    <p id="notice" class="notice" aria-live="polite"></p>
-  </main>
-  <script>
-    let totalScore = 0, gamesPlayed = [], questions = [], questionIndex = 0, activeGame = '', mainGame = '', isBonus = false, lastQuestionSets = {};
-    let memoryCards = [], firstCard = null, matchedCards = 0, lastMemorySet = '', memoryHint = '';
-    const area = () => document.getElementById('gameArea');
-    const say = message => document.getElementById('notice').textContent = message;
-    function updateScore(points) { totalScore += points; document.getElementById('scoreBoard').textContent = `Total Score: ${totalScore}`; }
-    function markGamePlayed(name) { if (!gamesPlayed.includes(name)) gamesPlayed.push(name); }
-    function shuffled(items) { return [...items].sort(() => Math.random() - .5); }
-    function freshQuestions(name, items) {
-      let selection, signature;
-      for (let attempt = 0; attempt < 8; attempt++) {
-        selection = shuffled(items).slice(0, Math.min(3, items.length));
-        signature = selection.map(item => item.q).sort().join('|');
-        if (signature !== lastQuestionSets[name] || items.length <= 3) break;
-      }
-      lastQuestionSets[name] = signature;
-      return selection;
-    }
-    function start(name, items, bonus = false) { activeGame = name; isBonus = bonus; if (!bonus) mainGame = name; markGamePlayed(name); questions = freshQuestions(name, items); questionIndex = 0; say(''); renderQuestion(); }
-    function renderQuestion() {
-      if (questionIndex >= questions.length) {
-        area().innerHTML = isBonus
-          ? `<h2>${activeGame} complete!</h2><p>Bonus mission accomplished.</p>${nextLevelButton()}`
-          : `<h2>${activeGame} complete!</h2><p>Mission accomplished. Your bonus game is ready!</p><button onclick="restartMainGame()">Restart Game</button>${assignedBonusButton()}`;
-        return;
-      }
-      const item = questions[questionIndex];
-      const input = item.input ? '<input id="answer" aria-label="Your answer" autofocus> <button onclick="submitInput()">Submit</button>' : item.options.map(option => `<button onclick='answer(${JSON.stringify(option)})'>${option}</button>`).join('');
-      area().innerHTML = `<h2>${activeGame}</h2><p>Question ${questionIndex + 1} of ${questions.length}</p><p>${item.q}</p>${input}`;
-    }
-    function answer(value) { grade(value); }
-    function submitInput() { grade(document.getElementById('answer').value.trim()); }
-    function grade(value) { const correct = questions[questionIndex].correct; const clean = text => text.toLowerCase().replace(/[^a-z0-9]/g, ''); const ok = clean(value) === clean(correct); updateScore(ok ? 10 : -5); say(ok ? '✅ Correct! +10 points' : `❌ Not quite. The answer was: ${correct}. -5 points`); questionIndex++; renderQuestion(); }
-    function startPhishing() { start('Phishing Detective', [
-      {q: '“Win a free iPhone! Click here now.”', options: ['Phishing', 'Legitimate'], correct: 'Phishing'},
-      {q: '“Your teacher shared homework on the school portal.”', options: ['Phishing', 'Legitimate'], correct: 'Legitimate'},
-      {q: '“Bank alert: Your account is locked. Sign in immediately.”', options: ['Phishing', 'Legitimate'], correct: 'Phishing'},
-      {q: '“You have won a prize. Reply with your password to claim it!”', options: ['Phishing', 'Legitimate'], correct: 'Phishing'},
-      {q: '“The library reminds you that your book is due Friday.”', options: ['Phishing', 'Legitimate'], correct: 'Legitimate'},
-      {q: '“Urgent: Verify your account by clicking this strange link.”', options: ['Phishing', 'Legitimate'], correct: 'Phishing'}
-    ]); }
-    function startIncident() { start('Incident Response', [
-      {q: 'A computer shows a ransomware message. What should you do first?', options: ['Isolate Computer', 'Pay Money'], correct: 'Isolate Computer'},
-      {q: 'You see a strange login at midnight. What should you do?', options: ['Tell Admin', 'Ignore'], correct: 'Tell Admin'},
-      {q: 'A virus is spreading fast. What is the first step?', options: ['Disconnect Internet', 'Do Nothing'], correct: 'Disconnect Internet'},
-      {q: 'You accidentally open a suspicious attachment. What should you do?', options: ['Tell a trusted adult or admin', 'Keep it secret'], correct: 'Tell a trusted adult or admin'},
-      {q: 'Your device behaves strangely after a download. What is a safe next step?', options: ['Run a security scan', 'Download more files'], correct: 'Run a security scan'},
-      {q: 'Someone asks for your password in a chat. What should you do?', options: ['Do not share it', 'Send it right away'], correct: 'Do not share it'}
-    ]); }
-    function startQuiz() { start('Network Defender Quiz', [
-      {q: 'Which tool helps keep hackers out?', options: ['Firewall', 'Calculator'], correct: 'Firewall'},
-      {q: 'HTTPS means your connection is…', options: ['Secure', 'Fast'], correct: 'Secure'},
-      {q: 'What is a safer way to log in?', options: ['Multi-factor', 'Password Only'], correct: 'Multi-factor'},
-      {q: 'Which password is stronger?', options: ['Blue!River9Moon', '123456'], correct: 'Blue!River9Moon'},
-      {q: 'What should you do with software updates?', options: ['Install them', 'Ignore them forever'], correct: 'Install them'},
-      {q: 'Which network is safest for private information?', options: ['A trusted secure network', 'An unknown public network'], correct: 'A trusted secure network'}
-    ]); }
-    function startEscape() { start('Cyber Escape Room', [
-      {q: 'Puzzle: 2 + 2 = ?', input: true, correct: '4'},
-      {q: 'What is a common safety step?', options: ['Update Software', 'Ignore Updates'], correct: 'Update Software'},
-      {q: 'Puzzle: 5 − 3 = ?', input: true, correct: '2'},
-      {q: 'Puzzle: How many letters are in the word “safe”?', input: true, correct: '4'},
-      {q: 'Which choice helps keep an account secure?', options: ['Use a strong password', 'Share your password'], correct: 'Use a strong password'},
-      {q: 'Puzzle: 10 ÷ 2 = ?', input: true, correct: '5'}
-    ]); }
-    function assignedBonusButton() {
-      const bonuses = {
-        'Phishing Detective': `<button onclick="emojiGame()">Play Emoji Guess 🎭</button>`,
-        'Incident Response': `<button onclick="memoryGame()">Play Memory Match 🃏</button>`,
-        'Network Defender Quiz': `<button onclick="wordGame()">Play Guess the Word 🔤</button>`,
-        'Cyber Escape Room': `<button onclick="crosswordGame()">Play Cyber Crossword ✏️</button>`
-      };
-      return bonuses[activeGame] || '';
-    }
-    function restartMainGame() { launchGame(mainGame); }
-    function restartActiveGame() { launchGame(activeGame); }
-    function launchGame(name) {
-      const games = {
-        'Phishing Detective': startPhishing,
-        'Incident Response': startIncident,
-        'Network Defender Quiz': startQuiz,
-        'Cyber Escape Room': startEscape,
-        'Emoji Guess 🎭': emojiGame,
-        'Memory Match 🃏': memoryGame,
-        'Guess the Word 🔤': wordGame,
-        'Cyber Crossword ✏️': crosswordGame
-      };
-      games[name]?.();
-    }
-    function nextLevelButton() {
-      const next = { 'Phishing Detective': 'Incident Response', 'Incident Response': 'Network Defender Quiz', 'Network Defender Quiz': 'Cyber Escape Room', 'Cyber Escape Room': 'Phishing Detective' };
-      const label = next[mainGame] || 'Phishing Detective';
-      const finalLevel = mainGame === 'Cyber Escape Room';
-      return `<button onclick="nextLevel()">${finalLevel ? 'Restart Level 1 ↻' : `Next Level: ${label} →`}</button>`;
-    }
-    function nextLevel() {
-      const next = { 'Phishing Detective': 'Incident Response', 'Incident Response': 'Network Defender Quiz', 'Network Defender Quiz': 'Cyber Escape Room', 'Cyber Escape Room': 'Phishing Detective' };
-      launchGame(next[mainGame] || 'Phishing Detective');
-    }
-    function emojiGame() { start('Emoji Guess 🎭', [
-      {q: 'What does 🎣 represent in cybersecurity?', options: ['Phishing', 'Firewall', 'Encryption'], correct: 'Phishing'},
-      {q: 'What does 🔒 represent?', options: ['Secure connection', 'Computer virus', 'Spam'], correct: 'Secure connection'},
-      {q: 'What does 🛡️ represent?', options: ['Protection', 'A weak password', 'A scam'], correct: 'Protection'},
-      {q: 'What does 🦠 represent?', options: ['Malware', 'A firewall', 'A secure login'], correct: 'Malware'},
-      {q: 'What does 🔑 represent?', options: ['Password or access key', 'Spam', 'A virus'], correct: 'Password or access key'},
-      {q: 'What does 👀 represent?', options: ['Watching for threats', 'Deleting files', 'A strong password'], correct: 'Watching for threats'}
-    ], true); }
-    function wordGame() { start('Guess the Word 🔤', [
-      {q: 'A secret word that helps protect your account: P _ _ _ W _ R D', input: true, correct: 'Password'},
-      {q: 'A tool that filters unsafe network traffic: F _ R _ W _ L L', input: true, correct: 'Firewall'},
-      {q: 'A fake email that tries to trick you: P _ _ S H _ N G', input: true, correct: 'Phishing'},
-      {q: 'A harmful computer program: M _ L W _ R E', input: true, correct: 'Malware'},
-      {q: 'A second login check: M _ L T I F _ C T _ R', input: true, correct: 'Multi-factor'},
-      {q: 'A secure web address starts with: H _ T P S', input: true, correct: 'HTTPS'}
-    ], true); }
-    function crosswordGame() { start('Cyber Crossword ✏️', [
-      {q: 'Across 1: A second login check after a password (two words).', input: true, correct: 'Multi-factor'},
-      {q: 'Down 2: Software that protects a device from harmful programs.', input: true, correct: 'Antivirus'},
-      {q: 'Across 3: A secure website address begins with this.', input: true, correct: 'HTTPS'},
-      {q: 'Down 4: A fake message made to steal information.', input: true, correct: 'Phishing'},
-      {q: 'Across 5: A security system that blocks unwanted network traffic.', input: true, correct: 'Firewall'},
-      {q: 'Down 6: Secret letters, numbers, and symbols used to log in.', input: true, correct: 'Password'}
-    ], true); }
-    function memoryGame() {
-      activeGame = 'Memory Match 🃏'; isBonus = true; markGamePlayed(activeGame); say('Find matching cybersecurity pairs.');
-      const sets = [
-        {cards: ['🔒', '🔒', '🛡️', '🛡️', '🎣', '🎣'], hint: 'Match the symbols: 🔒, 🛡️, and 🎣'},
-        {cards: ['🔑', '🔑', '🦠', '🦠', '💻', '💻'], hint: 'Match the symbols: 🔑, 🦠, and 💻'},
-        {cards: ['📧', '📧', '🌐', '🌐', '🔐', '🔐'], hint: 'Match the symbols: 📧, 🌐, and 🔐'}
-      ];
-      let chosen = sets[Math.floor(Math.random() * sets.length)];
-      if (sets.length > 1 && chosen.hint === lastMemorySet) chosen = sets.find(set => set.hint !== lastMemorySet);
-      lastMemorySet = chosen.hint; memoryHint = chosen.hint;
-      memoryCards = shuffled(chosen.cards); firstCard = null; matchedCards = 0; renderMemory();
-    }
-    function renderMemory() {
-      const cards = memoryCards.map((value, index) => `<button class="card ${value === '' ? 'revealed' : ''}" onclick="flipCard(${index})" ${value === '' ? 'disabled' : ''}>${value === '' ? '✓' : '?'}</button>`).join('');
-      area().innerHTML = `<h2>Memory Match 🃏</h2><p>${memoryHint}</p><div>${cards}</div>`;
-    }
-    function flipCard(index) {
-      if (memoryCards[index] === '') return;
-      if (firstCard === null) { firstCard = index; area().querySelectorAll('.card')[index].textContent = memoryCards[index]; return; }
-      if (firstCard === index) return;
-      const first = firstCard; const buttons = area().querySelectorAll('.card'); buttons[index].textContent = memoryCards[index];
-      if (memoryCards[first] === memoryCards[index]) { memoryCards[first] = ''; memoryCards[index] = ''; matchedCards += 2; updateScore(5); say('🎉 Match found! +5 points'); firstCard = null; setTimeout(() => matchedCards === memoryCards.length ? memoryComplete() : renderMemory(), 450); }
-      else { say('Try again!'); firstCard = null; setTimeout(renderMemory, 650); }
-    }
-    function memoryComplete() { area().innerHTML = `<h2>Memory Match complete!</h2><p>Great matching!</p>${nextLevelButton()}`; }
-    function showLeaderboard() { area().innerHTML = `<h2>Mission Log</h2><p>Games played: ${gamesPlayed.length ? gamesPlayed.join(', ') : 'None yet'}</p><p>Current score: ${totalScore}</p><button onclick="restartAdventure()">Restart Adventure ↻</button>`; }
-    function restartAdventure() { totalScore = 0; gamesPlayed = []; lastQuestionSets = {}; updateScore(0); startPhishing(); }
-  </script>
-</body>
-</html>
-
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Cyber Runner</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#06101c;color:#fff;font-family:Arial,sans-serif;touch-action:none}
+canvas{display:block;width:100%;height:100%}#hud{position:fixed;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;z-index:3;font-weight:bold}
+.p{background:#09213acc;border:1px solid #38ddff66;border-radius:20px;padding:8px 11px}
+#start,#end{position:fixed;inset:0;z-index:10;display:grid;place-items:center;background:#050b16eF;text-align:center;padding:20px}
+.box{max-width:520px;padding:28px;border:1px solid #39ddff66;border-radius:24px;background:#091827;box-shadow:0 0 60px #00cfff22}
+h1{color:#58edff;font-size:clamp(34px,9vw,58px);margin:5px 0}p{line-height:1.5;color:#c9d8e5}
+button{border:1px solid #49e5ff77;background:#103654;color:white;border-radius:14px;padding:13px 18px;font-weight:bold;font-size:16px}
+#controls{position:fixed;bottom:16px;left:16px;right:16px;z-index:5;display:flex;justify-content:space-between}
+.pad{display:grid;grid-template-columns:55px 55px 55px;grid-template-rows:55px 55px;gap:6px}.c{width:55px;height:55px;padding:0;background:#0d2a45dd;font-size:22px}.u{grid-column:2}.l{grid-column:1;grid-row:2}.d{grid-column:2;grid-row:2}.r{grid-column:3;grid-row:2}
+.hidden{display:none!important}
+</style></head><body>
+<div id="hud"><div class="p">❤️ <span id="hp">100</span></div><div class="p">💾 <span id="chips">0</span>/5</div><div class="p">⭐ <span id="score">0</span></div></div>
+<canvas id="c"></canvas>
+<div id="start"><div class="box"><div style="font-size:60px">🧑‍💻⚡</div><h1>CYBER RUNNER</h1><p>Collect 5 encrypted data chips, hack the terminal, then escape through the portal. Security bots are slow, but they are persistent. 🤖</p><p>Use WASD/arrow keys or the touch controls.</p><button onclick="begin()">▶ PLAY</button></div></div>
+<div id="end" class="hidden"><div class="box"><div id="ei" style="font-size:60px">🏆</div><h1 id="et">MISSION COMPLETE</h1><p id="ed"></p><button onclick="begin()">🔄 PLAY AGAIN</button></div></div>
+<div id="controls"><div class="pad"><button class="c u" data-k="u">▲</button><button class="c l" data-k="l">◀</button><button class="c d" data-k="d">▼</button><button class="c r" data-k="r">▶</button></div></div>
+<script>
+const cv=document.getElementById('c'),x=cv.getContext('2d');let W,H,D,run=false,last=0,score=0,hp=100,got=0,hack=false;
+const k={u:0,d:0,l:0,r:0};let p,bots,chips,walls,term,exit;
+function size(){D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;x.setTransform(D,0,0,D,0,0)}addEventListener('resize',size);size();
+function begin(){document.getElementById('start').classList.add('hidden');document.getElementById('end').classList.add('hidden');score=0;hp=100;got=0;hack=false;p={x:70,y:H-90,r:16,s:210};chips=[[W*.22,H*.22],[W*.47,H*.18],[W*.75,H*.27],[W*.29,H*.58],[W*.68,H*.68]].map(q=>({x:q[0],y:q[1],r:10}));bots=[{x:W*.8,y:H*.2,r:17,s:42},{x:W*.52,y:H*.5,r:17,s:36}];walls=[{x:W*.15,y:H*.38,w:W*.25,h:18},{x:W*.57,y:H*.42,w:W*.27,h:18},{x:W*.42,y:H*.67,w:18,h:H*.2}];term={x:W*.86,y:H*.52,r:25};exit={x:55,y:75,r:24};run=true;last=performance.now();requestAnimationFrame(loop)}
+function hitRect(o,nx,ny){if(nx<o.r||nx>W-o.r||ny<o.r+42||ny>H-o.r)return true;let q={x:nx,y:ny,r:o.r};return walls.some(r=>{let a=Math.max(r.x,Math.min(q.x,r.x+r.w)),b=Math.max(r.y,Math.min(q.y,r.y+r.h));return Math.hypot(q.x-a,q.y-b)<q.r})}
+function move(dt){let dx=k.r-k.l,dy=k.d-k.u;if(!dx&&!dy)return;let z=Math.hypot(dx,dy);dx/=z;dy/=z;let nx=p.x+dx*p.s*dt,ny=p.y+dy*p.s*dt;if(!hitRect(p,nx,p.y))p.x=nx;if(!hitRect(p,p.x,ny))p.y=ny}
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+function update(dt){move(dt);chips=chips.filter(q=>{if(dist(p,q)<p.r+q.r){got++;score+=100;return false}return true});
+bots.forEach(b=>{let d=dist(p,b);if(d<300){let a=Math.atan2(p.y-b.y,p.x-b.x),s=b.s*(d<150?1.15:.75),nx=b.x+Math.cos(a)*s*dt,ny=b.y+Math.sin(a)*s*dt;if(!hitRect(b,nx,b.y))b.x=nx;if(!hitRect(b,b.x,ny))b.y=ny}if(d<p.r+b.r)hp-=25*dt});
+if(got===5&&dist(p,term)<75&&hack){term.done=true;score+=500}
+if(term.done&&dist(p,exit)<50){run=false;finish(true)}if(hp<=0){run=false;finish(false)}
+document.getElementById('hp').textContent=Math.max(0,Math.ceil(hp));document.getElementById('chips').textContent=got;document.getElementById('score').textContent=score}
+function draw(){x.fillStyle='#06101c';x.fillRect(0,0,W,H);x.strokeStyle='#123047';for(let a=0;a<W;a+=32){x.beginPath();x.moveTo(a,45);x.lineTo(a,H);x.stroke()}for(let a=45;a<H;a+=32){x.beginPath();x.moveTo(0,a);x.lineTo(W,a);x.stroke()}walls.forEach(r=>{x.fillStyle='#102b42';x.fillRect(r.x,r.y,r.w,r.h)});chips.forEach(q=>{x.fillStyle='#55edff';x.shadowBlur=18;x.shadowColor='#00d9ff';x.fillRect(q.x-9,q.y-9,18,18);x.shadowBlur=0});x.fillStyle=term.done?'#24c77a':'#9b4de8';x.beginPath();x.arc(term.x,term.y,term.r,0,7);x.fill();x.font='22px Arial';x.textAlign='center';x.textBaseline='middle';x.fillText(term.done?'✓':'🔐',term.x,term.y);x.fillStyle=term.done?'#25d98b':'#344455';x.beginPath();x.arc(exit.x,exit.y,exit.r,0,7);x.fill();x.fillStyle='#fff';x.fillText('🚪',exit.x,exit.y);bots.forEach(b=>{x.fillStyle='#ff3158';x.beginPath();x.arc(b.x,b.y,b.r,0,7);x.fill();x.fillStyle='#fff';x.fillText('⚠',b.x,b.y)});x.fillStyle='#58edff';x.shadowBlur=18;x.shadowColor='#00d9ff';x.beginPath();x.arc(p.x,p.y,p.r,0,7);x.fill();x.shadowBlur=0;x.fillText('🧑‍💻',p.x,p.y)}
+function loop(t){if(!run)return;let dt=Math.min(.035,(t-last)/1000);last=t;update(dt);draw();requestAnimationFrame(loop)}
+function finish(win){document.getElementById('end').classList.remove('hidden');document.getElementById('ei').textContent=win?'🏆':'💥';document.getElementById('et').textContent=win?'NETWORK SAVED!':'SYSTEM BREACHED';document.getElementById('ed').textContent=win?'You hacked the terminal and escaped with '+score+' points! 🛡️':'The bots caught you. Final score: '+score+'. Try again!'}
+addEventListener('keydown',e=>{let a=e.key.toLowerCase();if(a==='w'||a==='arrowup')k.u=1;if(a==='s'||a==='arrowdown')k.d=1;if(a==='a'||a==='arrowleft')k.l=1;if(a==='d'||a==='arrowright')k.r=1;if(a==='h')hack=true});
+addEventListener('keyup',e=>{let a=e.key.toLowerCase();if(a==='w'||a==='arrowup')k.u=0;if(a==='s'||a==='arrowdown')k.d=0;if(a==='a'||a==='arrowleft')k.l=0;if(a==='d'||a==='arrowright')k.r=0;if(a==='h')hack=false});
+document.querySelectorAll('[data-k]').forEach(b=>{let q=b.dataset.k;b.onpointerdown=e=>{e.preventDefault();k[q]=1};b.onpointerup=b.onpointercancel=b.onpointerleave=e=>{e.preventDefault();k[q]=0}});
+</script></body></html>
