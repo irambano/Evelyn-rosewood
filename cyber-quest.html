@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Cyber Quest - Beginner Edition</title>
+<style>
+body{font-family:Arial,sans-serif;background:#111;color:#fff;text-align:center;margin:0;padding:25px}
+h1{color:#0ff;text-shadow:0 0 12px #0ff} h2{color:#7df}
+button{margin:8px;padding:11px 20px;font-size:16px;cursor:pointer;border:0;border-radius:8px;background:#087fda;color:#fff}
+button:hover{filter:brightness(1.2)} input{padding:10px;border-radius:7px;border:1px solid #555;font-size:16px}
+#gameArea{margin:25px auto;max-width:800px;min-height:130px;padding:25px;border:1px solid #333;border-radius:15px;background:#191919}
+#scoreBoard{margin-top:20px;font-size:20px;color:#0f0}
+.card{display:inline-block;width:70px;height:70px;margin:8px;font-size:22px}
+#reactionBox{position:relative;width:320px;height:210px;margin:15px auto;background:#222;border-radius:12px}
+#colorBox{width:120px;height:120px;margin:15px auto;border-radius:15px}
+</style>
+</head>
+<body>
+<h1>🛡️ Cyber Quest - Beginner Cybersecurity Games</h1>
+<p>Select a game to play:</p>
+<button onclick="startPhishing()">🎣 Phishing Detective</button>
+<button onclick="startIncident()">🚨 Incident Response</button>
+<button onclick="startQuiz()">🛡️ Network Defender Quiz</button>
+<button onclick="startEscape()">🔐 Cyber Escape Room</button>
+<button onclick="showLeaderboard()">🏆 Show Leaderboard</button>
+<div id="gameArea"><p>Choose a game to begin!</p></div>
+<div id="scoreBoard">Total Score: 0</div>
+<script>
+let totalScore=0,gamesPlayed=[];
+const area=()=>document.getElementById("gameArea");
+function updateScore(p){totalScore+=p;document.getElementById("scoreBoard").textContent="Total Score: "+totalScore;}
+function markGamePlayed(n){if(!gamesPlayed.includes(n))gamesPlayed.push(n);}
+function feedback(ok){area().insertAdjacentHTML("beforeend",`<p style="color:${ok?'#0f0':'#f66'}">${ok?'✅ Correct! +10 points':'❌ Wrong! -5 points'}</p>`);updateScore(ok?10:-5);}
+let phishingQ=0;
+const phishingQuestions=[{q:'Email: "Win a free iPhone! Click here."',correct:'Phishing'},{q:'Email: "Your teacher shared homework on the school portal."',correct:'Legitimate'}];
+function startPhishing(){markGamePlayed("Phishing Detective");phishingQ=0;nextPhishing();}
+function nextPhishing(){if(phishingQ<phishingQuestions.length){let q=phishingQuestions[phishingQ];area().innerHTML=`<h2>🎣 Phishing Detective</h2><p>${q.q}</p><button onclick="checkPhishing('Phishing')">Phishing</button><button onclick="checkPhishing('Legitimate')">Legitimate</button>`;}else area().innerHTML='<h2>🎉 Phishing Complete!</h2><button onclick="reactionGame()">Play Reaction Clicker 🎮</button>';}
+function checkPhishing(a){feedback(a===phishingQuestions[phishingQ].correct);phishingQ++;setTimeout(nextPhishing,500);}
+let incidentQ=0;
+const incidentScenarios=[{q:"Computer shows ransomware message. What should you do first?",options:["Isolate Computer","Pay Money"],correct:"Isolate Computer"},{q:"You see a strange login at midnight. What should you do?",options:["Tell Admin","Ignore"],correct:"Tell Admin"}];
+function startIncident(){markGamePlayed("Incident Response");incidentQ=0;nextIncident();}
+function nextIncident(){if(incidentQ<incidentScenarios.length){let s=incidentScenarios[incidentQ];area().innerHTML=`<h2>🚨 Incident Response</h2><p>${s.q}</p>`+s.options.map(o=>`<button onclick="checkIncident('${o}')">${o}</button>`).join("");}else area().innerHTML='<h2>🎉 Incident Response Complete!</h2><button onclick="memoryGame()">Play Memory Match 🎮</button>';}
+function checkIncident(a){feedback(a===incidentScenarios[incidentQ].correct);incidentQ++;setTimeout(nextIncident,500);}
+let quizQ=0;
+const quizQuestions=[{q:"Which tool helps block unauthorized network access?",options:["Firewall","Calculator"],correct:"Firewall"},{q:"HTTPS means your connection is…",options:["Secure","Fast"],correct:"Secure"}];
+function startQuiz(){markGamePlayed("Network Defender Quiz");quizQ=0;nextQuiz();}
+function nextQuiz(){if(quizQ<quizQuestions.length){let q=quizQuestions[quizQ];area().innerHTML=`<h2>🛡️ Network Defender Quiz</h2><p>${q.q}</p>`+q.options.map(o=>`<button onclick="checkQuiz('${o}')">${o}</button>`).join("");}else area().innerHTML='<h2>🎉 Quiz Complete!</h2><button onclick="colorGame()">Play Color Picker 🎮</button>';}
+function checkQuiz(a){feedback(a===quizQuestions[quizQ].correct);quizQ++;setTimeout(nextQuiz,500);}
+let escapeQ=0;
+const escapePuzzles=[{q:"Puzzle: 2 + 2 = ?",type:"input",correct:"4"},{q:"Puzzle: Which is a common cyber-safety step?",type:"choice",options:["Update Software","Ignore Updates"],correct:"Update Software"}];
+function startEscape(){markGamePlayed("Cyber Escape Room");escapeQ=0;nextEscape();}
+function nextEscape(){if(escapeQ<escapePuzzles.length){let p=escapePuzzles[escapeQ];if(p.type==="input")area().innerHTML=`<h2>🔐 Cyber Escape Room</h2><p>${p.q}</p><input id="ans"><button onclick="checkEscapeInput()">Submit</button>`;else area().innerHTML=`<h2>🔐 Cyber Escape Room</h2><p>${p.q}</p>`+p.options.map(o=>`<button onclick="checkEscapeChoice('${o}')">${o}</button>`).join("");}else area().innerHTML='<h2>🎉 Escape Room Complete!</h2><button onclick="mathGame()">Play Math Quickfire 🎮</button>';}
+function checkEscapeInput(){feedback(document.getElementById("ans").value.trim()===escapePuzzles[escapeQ].correct);escapeQ++;setTimeout(nextEscape,500);}
+function checkEscapeChoice(a){feedback(a===escapePuzzles[escapeQ].correct);escapeQ++;setTimeout(nextEscape,500);}
+function reactionGame(){area().innerHTML='<h2>⚡ Reaction Clicker</h2><p>Press Start, then click the target as soon as it appears!</p><div id="reactionBox"></div><button onclick="startReaction()">Start</button>';}
+function startReaction(){let box=document.getElementById("reactionBox");box.innerHTML="<p>Wait...</p>";setTimeout(()=>{let b=document.createElement("button");b.textContent="CLICK!";b.style.position="absolute";b.style.top=Math.floor(Math.random()*150+20)+"px";b.style.left=Math.floor(Math.random()*240+20)+"px";b.onclick=()=>{updateScore(5);box.innerHTML='<p style="color:#0f0">🎉 Great reflexes! +5</p>';};box.innerHTML="";box.appendChild(b);},1000+Math.random()*2000);}
+function memoryGame(){let symbols=["🔒","🔒","🛡️","🛡️"];symbols.sort(()=>Math.random()-.5);area().innerHTML='<h2>🧠 Memory Match</h2><p>Find the matching pair!</p><div id="cards"></div>';let first=null,lock=false,matched=0;symbols.forEach(s=>{let b=document.createElement("button");b.className="card";b.textContent="❓";b.dataset.v=s;b.onclick=()=>{if(lock||b.textContent!=="❓")return;b.textContent=s;if(!first){first=b;return;}lock=true;if(first.dataset.v===b.dataset.v){matched+=2;first=null;lock=false;if(matched===4){updateScore(5);area().insertAdjacentHTML("beforeend",'<p style="color:#0f0">🎉 Match complete! +5</p>');}}else setTimeout(()=>{first.textContent="❓";b.textContent="❓";first=null;lock=false;},600);};document.getElementById("cards").appendChild(b);});}
+function colorGame(){let colors=["red","blue","green","purple"],target=colors[Math.floor(Math.random()*colors.length)];area().innerHTML=`<h2>🎨 Color Picker</h2><p>Click the button matching the color shown.</p><div id="colorBox" style="background:${target}"></div>`+colors.map(c=>`<button onclick="checkColor('${c}','${target}')">${c}</button>`).join("");}
+function checkColor(c,t){if(c===t){updateScore(5);area().insertAdjacentHTML("beforeend",'<p style="color:#0f0">🎉 Correct color! +5</p>');}else area().insertAdjacentHTML("beforeend",'<p style="color:#f66">❌ Try again!</p>');}
+function mathGame(){let a=Math.floor(Math.random()*9)+1,b=Math.floor(Math.random()*9)+1;area().innerHTML=`<h2>➕ Math Quickfire</h2><p>What is ${a} + ${b}?</p><input id="mathAns" type="number"><button onclick="checkMath(${a+b})">Submit</button>`;}
+function checkMath(answer){if(Number(document.getElementById("mathAns").value)===answer){updateScore(5);area().innerHTML='<h2>🎉 Correct!</h2><p>+5 points</p>';}else area().innerHTML=`<h2>😅 Not quite!</h2><p>The answer was ${answer}.</p>`;}
+function showLeaderboard(){let rank=totalScore>=35?"Cybersecurity Expert":totalScore>=15?"Cyber Defender":"Beginner";area().innerHTML=`<h2>🏆 Leaderboard</h2><p>Score: <strong>${totalScore}</strong></p><p>Games Played: ${gamesPlayed.length}</p><p>Rank: <strong>${rank}</strong></p><p>${gamesPlayed.length?gamesPlayed.join(" • "):"No games played yet"}</p><button onclick="resetGame()">Reset Score</button>`;}
+function resetGame(){totalScore=0;gamesPlayed=[];document.getElementById("scoreBoard").textContent="Total Score: 0";area().innerHTML="<h2>🔄 Score Reset!</h2>";}
+</script>
+</body>
+</html>
