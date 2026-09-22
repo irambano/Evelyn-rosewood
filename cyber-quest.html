@@ -108,8 +108,8 @@ function checkEscapeInput(){feedback(document.getElementById("ans").value.trim()
 function checkEscapeChoice(a){feedback(a===escapeLevels[level-1][escapeQ].a);escapeQ++;setTimeout(nextEscape,500)}
 function advanceEscape(){level++;escapeQ=0;nextEscape()}
 
-function showLeaderboard(){enterGame();let rank=totalScore>=80?"Cybersecurity Expert":totalScore>=40?"Cyber Defender":"Beginner";area().innerHTML=`<h2>🏆 Leaderboard</h2><p>Score: <strong>${totalScore}</strong></p><p>Games Played: ${gamesPlayed.length}</p><p>Rank: <strong>${rank}</strong></p><button onclick="resetGame()">Reset Score</button>`+backButton()}
-function resetGame(){totalScore=0;gamesPlayed=[];level=1;document.getElementById("scoreBoard").textContent="Total Score: 0";area().innerHTML="<h2>🔄 Score Reset!</h2>"+backButton()}
+function showLeaderboard(){enterGame();let rank=totalScore>=80?"Cybersecurity Expert":totalScore>=40?"Cyber Defender":"Beginner";area().innerHTML=`<h2>🏆 Mission Complete</h2><p>Final Score: <strong>${totalScore}</strong></p><p>Games Completed: ${gamesPlayed.length}</p><p>Rank: <strong>${rank}</strong></p><div style="margin:25px 0;padding:20px;border:1px solid #35dfff;border-radius:16px;background:rgba(0,80,120,.18)"><h3>🎉 Your Cyber Quest is Complete!</h3><p>Ready for another mission?</p><button onclick="resetGame()">🔄 RESTART GAME</button></div>`+backButton()}
+function resetGame(){totalScore=0;gamesPlayed=[];level=1;phishingQ=0;incidentQ=0;quizQ=0;escapeQ=0;document.getElementById("scoreBoard").textContent="Total Score: 0";area().innerHTML="<h2>🚀 New Mission Ready!</h2><p>All progress has been reset.</p><button onclick=\"startPhishing()\">🎣 Start New Mission</button>"+backButton()}
 </script>
 </body>
 </html>
