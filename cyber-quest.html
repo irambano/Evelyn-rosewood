@@ -41,11 +41,31 @@ function updateScore(p){totalScore+=p;document.getElementById("scoreBoard").text
 function markGamePlayed(n){if(!gamesPlayed.includes(n))gamesPlayed.push(n)}
 function feedback(ok){area().insertAdjacentHTML("beforeend",`<p style="color:${ok?'#0f0':'#f66'}">${ok?'✅ Correct! +10 points':'❌ Wrong! -5 points'}</p>`);updateScore(ok?10:-5)}
 function nextLevelButton(fn){return '<button onclick="'+fn+'()">🚀 Next Level</button>'+backButton()}
-function miniDone(nextFn,finalText,msg){updateScore(5);area().innerHTML='<h2>🎉 Mission Complete!</h2><p>'+msg+'</p><p style="color:#69ff9a">+5 BONUS POINTS</p>'+(nextFn?nextLevelButton(nextFn):'<p>'+finalText+'</p>'+backButton())}
+function miniDone(nextFn,finalText,msg){updateScore(5);area().innerHTML='<h2>🏆 Mini-Mission Complete!</h2><p>'+msg+'</p><p style="color:#69ff9a">+5 BONUS POINTS</p>'+(nextFn?nextLevelButton(nextFn):'<p>'+finalText+'</p>'+backButton())}
 function showMiniGame(nextFn,finalText,type){
- if(type==="reaction"){area().innerHTML='<div class="mini-title">⚡ LASER REACTION RUN</div><p>🚨 Security breach! Wait for the alarm to turn green, then HIT GO!</p><button id="miniBtn" disabled>🔴 ARMED...</button>';setTimeout(()=>{const b=document.getElementById("miniBtn");if(!b)return;b.disabled=false;b.textContent="🟢 HIT GO!";b.onclick=()=>miniDone(nextFn,finalText,"⚡ You dodged the firewall laser!");},900+Math.random()*1400);return}
- if(type==="memory"){let vals=["🔐","🔐","🛡️","🛡️","🧬","🧬"].sort(()=>Math.random()-.5),first=null,lock=false,matches=0;area().innerHTML='<div class="mini-title">🕵️ SECURITY VAULT</div><p>Match the 3 security pairs before the vault locks!</p><div id="cards"></div>';vals.forEach(v=>{let b=document.createElement("button");b.className="card";b.textContent="❓";b.dataset.v=v;b.onclick=()=>{if(lock||b.textContent!=="❓")return;b.textContent=v;if(!first){first=b;return}lock=true;if(first.dataset.v===v){matches+=2;first=null;lock=false;if(matches===6)miniDone(nextFn,finalText,"🔓 Vault unlocked! You secured the network.");}else setTimeout(()=>{first.textContent="❓";b.textContent="❓";first=null;lock=false},450)};document.getElementById("cards").appendChild(b)});return}
- let a=Math.floor(Math.random()*8)+3,b=Math.floor(Math.random()*8)+3,ans=a+b;area().innerHTML='<div class="mini-title">🚀 CYBER ROCKET ESCAPE</div><p>🚨 The server is exploding! Solve the code to launch the escape rocket.</p><h2>'+a+' + '+b+' = ?</h2><input id="miniAns" type="number" autofocus><button onclick="finishMiniMath('+ans+')">🚀 LAUNCH!</button>';window.finishMiniMath=(x)=>{const el=document.getElementById("miniAns");if(el&&Number(el.value)===x)miniDone(nextFn,finalText,"🚀 Rocket launched! You escaped the collapsing server.");else area().insertAdjacentHTML("beforeend",'<p style="color:#ff6b6b">💥 Wrong code! Try again before the countdown ends!</p>')}}
+ if(type==="reaction"){
+   let hits=0,total=6;
+   area().innerHTML='<div class="mini-title">🛸 DRONE DODGE</div><p>Move your cursor or finger over the targets before they disappear!</p><div id="droneGame" style="position:relative;height:300px;max-width:700px;margin:20px auto;background:#07111f;border:2px solid #27dfff;border-radius:18px;overflow:hidden"></div><p id="droneScore">Targets hit: 0 / 6</p>';
+   const box=document.getElementById("droneGame");
+   function spawn(){
+     if(hits>=total)return;
+     const t=document.createElement("button");t.textContent="🎯";t.style.position="absolute";t.style.minWidth="0";t.style.width="58px";t.style.height="58px";t.style.padding="0";t.style.margin="0";t.style.borderRadius="50%";t.style.left=(5+Math.random()*85)+"%";t.style.top=(5+Math.random()*75)+"%";
+     box.appendChild(t);
+     let timer=setTimeout(()=>{t.remove();spawn()},1100);
+     t.onclick=()=>{clearTimeout(timer);t.remove();hits++;document.getElementById("droneScore").textContent="Targets hit: "+hits+" / "+total;if(hits===total)miniDone(nextFn,finalText,"🎯 Drone course cleared! You protected the server.");else spawn()};
+   }
+   spawn();return;
+ }
+ if(type==="memory"){
+   let symbols=["🦾","🦾","💣","💣","🔑","🔑","🛡️","🛡️"].sort(()=>Math.random()-.5),first=null,lock=false,matches=0;
+   area().innerHTML='<div class="mini-title">🧩 HACKER VAULT</div><p>Find all 4 matching security pairs before the vault closes!</p><div id="cards"></div><p id="vaultStatus">Pairs found: 0 / 4</p>';
+   symbols.forEach(v=>{let b=document.createElement("button");b.className="card";b.textContent="❓";b.dataset.v=v;b.onclick=()=>{if(lock||b.textContent!=="❓")return;b.textContent=v;if(!first){first=b;return}lock=true;if(first.dataset.v===v){matches++;first=null;lock=false;document.getElementById("vaultStatus").textContent="Pairs found: "+matches+" / 4";if(matches===4)miniDone(nextFn,finalText,"🔓 Hacker vault unlocked!")}else setTimeout(()=>{first.textContent="❓";b.textContent="❓";first=null;lock=false},450)};document.getElementById("cards").appendChild(b)});return;
+ }
+ let code=Math.floor(Math.random()*90)+10,sequence=String(code).split(""),step=0;
+ area().innerHTML='<div class="mini-title">🔢 SECURITY CODE BREAKER</div><p>Memorize the access code, then enter it to escape!</p><h2 id="codeDisplay">'+code+'</h2><input id="codeInput" inputmode="numeric" placeholder="Enter code"><button onclick="checkCode()">🔓 UNLOCK</button>';
+ setTimeout(()=>{const d=document.getElementById("codeDisplay");if(d)d.textContent="••";},1800);
+ window.checkCode=()=>{const x=document.getElementById("codeInput");if(x&&x.value===String(code))miniDone(nextFn,finalText,"🔓 Access code cracked! Escape route opened.");else area().insertAdjacentHTML("beforeend",'<p style="color:#ff6b6b">🚨 Access denied! Check the code and try again.</p>')};
+}
 function levelComplete(nextFn,finalText,type){showMiniGame(nextFn,finalText,type)}
 let phishingQ=0;
 const phishingLevels=[
