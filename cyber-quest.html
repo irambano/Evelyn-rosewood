@@ -5,13 +5,23 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Cyber Quest - Beginner Edition</title>
 <style>
-body{font-family:Arial,sans-serif;background:#111;color:#fff;text-align:center;margin:0;padding:25px}
-h1{color:#0ff;text-shadow:0 0 12px #0ff;font-size:clamp(32px,7vw,56px);margin:10px 0 20px}
-h2{color:#7df} button{margin:8px;padding:11px 20px;font-size:16px;cursor:pointer;border:0;border-radius:8px;background:#087fda;color:#fff}
-button:hover{filter:brightness(1.2)}input{padding:10px;border-radius:7px;border:1px solid #555;font-size:16px}
-#menu{max-width:800px;margin:0 auto 20px}#gameArea{margin:25px auto;max-width:800px;min-height:130px;padding:25px;border:1px solid #333;border-radius:15px;background:#191919}
-#scoreBoard{margin-top:20px;font-size:20px;color:#0f0}.card{display:inline-block;width:70px;height:70px;margin:8px;font-size:22px}
-#reactionBox{position:relative;width:320px;height:210px;margin:15px auto;background:#222;border-radius:12px}.hidden{display:none}.back{background:#555}.level{color:#ffd700;font-weight:bold}
+*{box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:radial-gradient(circle at top,#172b46 0,#080d16 45%,#05070b 100%);color:#fff;text-align:center;margin:0;padding:28px 40px;min-height:100vh}
+h1{color:#63f5ff;text-shadow:0 0 12px #0ff,0 0 30px #087fda;font-size:clamp(38px,6vw,68px);margin:8px 0 12px;letter-spacing:3px}
+h2{color:#8eeaff;text-shadow:0 0 10px #087fda}
+button{margin:8px;padding:14px 24px;font-size:17px;cursor:pointer;border:1px solid #27dfff;border-radius:12px;background:linear-gradient(135deg,#087fda,#1742a0);color:#fff;box-shadow:0 5px 18px rgba(0,180,255,.22);transition:.15s;min-width:150px}
+button:hover{transform:translateY(-2px) scale(1.02);filter:brightness(1.2);box-shadow:0 8px 25px rgba(0,220,255,.35)}
+button:active{transform:translateY(1px)}
+input{padding:13px 15px;border-radius:10px;border:1px solid #35dfff;background:#101a28;color:#fff;font-size:17px;outline:none}
+#menu{max-width:1100px;margin:0 auto 24px;padding:18px;border:1px solid #244b70;border-radius:20px;background:rgba(13,25,42,.78);box-shadow:0 15px 45px rgba(0,0,0,.35)}
+#menu p{margin:4px 0 12px;color:#b9d8ef;font-size:18px}
+#gameArea{margin:25px auto;max-width:1100px;min-height:240px;padding:38px;border:1px solid #285578;border-radius:22px;background:linear-gradient(145deg,rgba(18,35,55,.96),rgba(8,15,26,.96));box-shadow:0 18px 55px rgba(0,0,0,.4)}
+#gameArea p{font-size:19px;line-height:1.5}
+#scoreBoard{margin:18px auto;font-size:21px;color:#69ff9a;font-weight:bold;max-width:1100px;padding:12px;border-radius:12px;background:rgba(0,40,25,.35)}
+.card{display:inline-block;width:88px;height:88px;margin:10px;font-size:30px}
+.hidden{display:none}.back{background:#334155;border-color:#64748b}.level{color:#ffd84d;font-weight:bold;font-size:19px;letter-spacing:2px}
+.mini-title{font-size:28px;color:#ffdf70}
+@media(max-width:700px){body{padding:18px 12px}#gameArea{padding:22px 14px}button{min-width:135px;padding:12px 16px;font-size:15px}h1{letter-spacing:1px}}
 </style>
 </head>
 <body>
@@ -31,10 +41,11 @@ function updateScore(p){totalScore+=p;document.getElementById("scoreBoard").text
 function markGamePlayed(n){if(!gamesPlayed.includes(n))gamesPlayed.push(n)}
 function feedback(ok){area().insertAdjacentHTML("beforeend",`<p style="color:${ok?'#0f0':'#f66'}">${ok?'✅ Correct! +10 points':'❌ Wrong! -5 points'}</p>`);updateScore(ok?10:-5)}
 function nextLevelButton(fn){return '<button onclick="'+fn+'()">🚀 Next Level</button>'+backButton()}
+function miniDone(nextFn,finalText,msg){updateScore(5);area().innerHTML='<h2>🎉 Mission Complete!</h2><p>'+msg+'</p><p style="color:#69ff9a">+5 BONUS POINTS</p>'+(nextFn?nextLevelButton(nextFn):'<p>'+finalText+'</p>'+backButton())}
 function showMiniGame(nextFn,finalText,type){
- if(type==="reaction"){area().innerHTML='<h2>⚡ Mini Game: Reaction Tap</h2><p>Wait for GO, then tap it!</p><button id="miniBtn" disabled>WAIT...</button>';setTimeout(()=>{const b=document.getElementById("miniBtn");if(!b)return;b.disabled=false;b.textContent="🚀 GO!";b.onclick=()=>{updateScore(5);area().innerHTML='<h2>🎉 Great Reaction!</h2><p>+5 bonus points!</p>'+(nextFn?nextLevelButton(nextFn):'<p>'+finalText+'</p>'+backButton())}},1200);return}
- if(type==="memory"){let vals=["🔐","🔐","🛡️","🛡️"].sort(()=>Math.random()-.5),first=null,lock=false,matches=0;area().innerHTML='<h2>🧠 Mini Game: Memory Match</h2><p>Find both matching pairs!</p><div id="cards"></div>';vals.forEach(v=>{let b=document.createElement("button");b.className="card";b.textContent="❓";b.dataset.v=v;b.onclick=()=>{if(lock||b.textContent!=="❓")return;b.textContent=v;if(!first){first=b;return}lock=true;if(first.dataset.v===v){matches+=2;first=null;lock=false;if(matches===4){updateScore(5);area().insertAdjacentHTML("beforeend",'<p style="color:#0f0">🎉 Memory complete! +5</p>'+ (nextFn?nextLevelButton(nextFn):'<p>'+finalText+'</p>'+backButton()))}}else setTimeout(()=>{first.textContent="❓";b.textContent="❓";first=null;lock=false},500)};document.getElementById("cards").appendChild(b)});return}
- let a=Math.floor(Math.random()*8)+2,b=Math.floor(Math.random()*8)+2,ans=a+b;area().innerHTML='<h2>➕ Mini Game: Quick Math</h2><p>What is '+a+' + '+b+'?</p><input id="miniAns" type="number"><button onclick="finishMiniMath('+ans+')">Submit</button>';window.finishMiniMath=(x)=>{if(Number(document.getElementById("miniAns").value)===x){updateScore(5);area().innerHTML='<h2>🎉 Correct!</h2><p>+5 bonus points!</p>'+(nextFn?nextLevelButton(nextFn):'<p>'+finalText+'</p>'+backButton())}else area().insertAdjacentHTML("beforeend",'<p style="color:#f66">❌ Try again!</p>')}}
+ if(type==="reaction"){area().innerHTML='<div class="mini-title">⚡ LASER REACTION RUN</div><p>🚨 Security breach! Wait for the alarm to turn green, then HIT GO!</p><button id="miniBtn" disabled>🔴 ARMED...</button>';setTimeout(()=>{const b=document.getElementById("miniBtn");if(!b)return;b.disabled=false;b.textContent="🟢 HIT GO!";b.onclick=()=>miniDone(nextFn,finalText,"⚡ You dodged the firewall laser!");},900+Math.random()*1400);return}
+ if(type==="memory"){let vals=["🔐","🔐","🛡️","🛡️","🧬","🧬"].sort(()=>Math.random()-.5),first=null,lock=false,matches=0;area().innerHTML='<div class="mini-title">🕵️ SECURITY VAULT</div><p>Match the 3 security pairs before the vault locks!</p><div id="cards"></div>';vals.forEach(v=>{let b=document.createElement("button");b.className="card";b.textContent="❓";b.dataset.v=v;b.onclick=()=>{if(lock||b.textContent!=="❓")return;b.textContent=v;if(!first){first=b;return}lock=true;if(first.dataset.v===v){matches+=2;first=null;lock=false;if(matches===6)miniDone(nextFn,finalText,"🔓 Vault unlocked! You secured the network.");}else setTimeout(()=>{first.textContent="❓";b.textContent="❓";first=null;lock=false},450)};document.getElementById("cards").appendChild(b)});return}
+ let a=Math.floor(Math.random()*8)+3,b=Math.floor(Math.random()*8)+3,ans=a+b;area().innerHTML='<div class="mini-title">🚀 CYBER ROCKET ESCAPE</div><p>🚨 The server is exploding! Solve the code to launch the escape rocket.</p><h2>'+a+' + '+b+' = ?</h2><input id="miniAns" type="number" autofocus><button onclick="finishMiniMath('+ans+')">🚀 LAUNCH!</button>';window.finishMiniMath=(x)=>{const el=document.getElementById("miniAns");if(el&&Number(el.value)===x)miniDone(nextFn,finalText,"🚀 Rocket launched! You escaped the collapsing server.");else area().insertAdjacentHTML("beforeend",'<p style="color:#ff6b6b">💥 Wrong code! Try again before the countdown ends!</p>')}}
 function levelComplete(nextFn,finalText,type){showMiniGame(nextFn,finalText,type)}
 let phishingQ=0;
 const phishingLevels=[
