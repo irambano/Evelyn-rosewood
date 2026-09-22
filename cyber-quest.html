@@ -42,7 +42,7 @@ const phishingLevels=[
 [{q:'A message says your account will be deleted in 10 minutes unless you click a link.',a:'Phishing'},{q:'You expected an email from your bank and open its official app to check the alert instead of clicking the email link.',a:'Legitimate'}],
 [{q:'The sender address is support@paypa1-security.example and asks you to enter your password on a link.',a:'Phishing'},{q:'An email passes normal checks but asks for your password and one-time code. What should you do?',a:'Phishing'}]];
 function startPhishing(){enterGame();level=1;markGamePlayed("Phishing Detective");phishingQ=0;nextPhishing()}
-function nextPhishing(){let qs=phishingLevels[level-1];if(phishingQ<qs.length){let q=qs[phishingQ];area().innerHTML=`<div class="level">LEVEL ${level}</div><h2>🎣 Phishing Detective</h2><p>${q.q}</p><button onclick="checkPhishing('Phishing')">Phishing</button><button onclick="checkPhishing('Legitimate')">Legitimate</button>`}else levelComplete(level<3?'advancePhishing':null,'🏆 Phishing Detective completed!','reaction')
+function nextPhishing(){let qs=phishingLevels[level-1];if(phishingQ<qs.length){let q=qs[phishingQ];area().innerHTML=`<div class="level">LEVEL ${level}</div><h2>🎣 Phishing Detective</h2><p>${q.q}</p><button onclick="checkPhishing('Phishing')">Phishing</button><button onclick="checkPhishing('Legitimate')">Legitimate</button>`}else levelComplete(level<3?'advancePhishing':null,'🏆 Phishing Detective completed!','reaction');}
 function checkPhishing(a){feedback(a===phishingLevels[level-1][phishingQ].a);phishingQ++;setTimeout(nextPhishing,500)}
 function advancePhishing(){level++;phishingQ=0;nextPhishing()}
 
@@ -52,7 +52,7 @@ const incidentLevels=[
 [{q:"Malware is spreading between computers. What is the safest immediate action?",o:["Disconnect Affected Systems","Share Files"],a:"Disconnect Affected Systems"},{q:"A user reports a suspicious attachment before opening it. What should they do?",o:["Report It","Open It"],a:"Report It"}],
 [{q:"Several accounts are compromised at once. What should an incident responder prioritize?",o:["Contain the Incident","Post Passwords Online"],a:"Contain the Incident"},{q:"A security log shows repeated failed logins followed by a successful login from an unusual location. What should happen next?",o:["Investigate and Alert","Ignore It"],a:"Investigate and Alert"}]];
 function startIncident(){enterGame();level=1;markGamePlayed("Incident Response");incidentQ=0;nextIncident()}
-function nextIncident(){let qs=incidentLevels[level-1];if(incidentQ<qs.length){let s=qs[incidentQ];area().innerHTML=`<div class="level">LEVEL ${level}</div><h2>🚨 Incident Response</h2><p>${s.q}</p>`+s.o.map(o=>`<button onclick="checkIncident('${o}')">${o}</button>`).join("")}else levelComplete(level<3?'advanceIncident':null,'🏆 Incident Response completed!','memory')
+function nextIncident(){let qs=incidentLevels[level-1];if(incidentQ<qs.length){let s=qs[incidentQ];area().innerHTML=`<div class="level">LEVEL ${level}</div><h2>🚨 Incident Response</h2><p>${s.q}</p>`+s.o.map(o=>`<button onclick="checkIncident('${o}')">${o}</button>`).join("")}else levelComplete(level<3?'advanceIncident':null,'🏆 Incident Response completed!','memory');}
 function checkIncident(a){feedback(a===incidentLevels[level-1][incidentQ].a);incidentQ++;setTimeout(nextIncident,500)}
 function advanceIncident(){level++;incidentQ=0;nextIncident()}
 
@@ -62,7 +62,7 @@ const quizLevels=[
 [{q:"Which control limits how many requests a server accepts in a short time?",o:["Rate Limiting","Screen Brightness"],a:"Rate Limiting"},{q:"Which security method adds a second verification step after a password?",o:["Multi-factor Authentication","Auto-play"],a:"Multi-factor Authentication"}],
 [{q:"Which attack attempts to overwhelm a service with traffic from many systems?",o:["Distributed Denial-of-Service (DDoS)","Data Backup"],a:"Distributed Denial-of-Service (DDoS)"},{q:"A firewall rule should generally allow network traffic only when it is…",o:["Needed and authorized","Randomly selected"],a:"Needed and authorized"}]];
 function startQuiz(){enterGame();level=1;markGamePlayed("Network Defender Quiz");quizQ=0;nextQuiz()}
-function nextQuiz(){let qs=quizLevels[level-1];if(quizQ<qs.length){let q=qs[quizQ];area().innerHTML=`<div class="level">LEVEL ${level}</div><h2>🛡️ Network Defender Quiz</h2><p>${q.q}</p>`+q.o.map(o=>`<button onclick="checkQuiz('${o}')">${o}</button>`).join("")}else levelComplete(level<3?'advanceQuiz':null,'🏆 Network Defender completed!','reaction')
+function nextQuiz(){let qs=quizLevels[level-1];if(quizQ<qs.length){let q=qs[quizQ];area().innerHTML=`<div class="level">LEVEL ${level}</div><h2>🛡️ Network Defender Quiz</h2><p>${q.q}</p>`+q.o.map(o=>`<button onclick="checkQuiz('${o}')">${o}</button>`).join("")}else levelComplete(level<3?'advanceQuiz':null,'🏆 Network Defender completed!','reaction');}
 function checkQuiz(a){feedback(a===quizLevels[level-1][quizQ].a);quizQ++;setTimeout(nextQuiz,500)}
 function advanceQuiz(){level++;quizQ=0;nextQuiz()}
 
@@ -72,7 +72,7 @@ const escapeLevels=[
 [{q:"Puzzle: 12 ÷ 3 = ?",type:"input",a:"4"},{q:"Which action helps protect an account after a suspected password theft?",o:["Change the Password","Reuse the Same Password"],a:"Change the Password"}],
 [{q:"Puzzle: If a code starts at 5 and adds 7, what is the result?",type:"input",a:"12"},{q:"Which practice best reduces the damage if ransomware encrypts your files?",o:["Keep Tested Backups","Use One Password Everywhere"],a:"Keep Tested Backups"}]];
 function startEscape(){enterGame();level=1;markGamePlayed("Cyber Escape Room");escapeQ=0;nextEscape()}
-function nextEscape(){let qs=escapeLevels[level-1];if(escapeQ<qs.length){let p=qs[escapeQ];if(p.type==="input")area().innerHTML=`<div class="level">LEVEL ${level}</div><h2>🔐 Cyber Escape Room</h2><p>${p.q}</p><input id="ans"><button onclick="checkEscapeInput()">Submit</button>`;else area().innerHTML=`<div class="level">LEVEL ${level}</div><h2>🔐 Cyber Escape Room</h2><p>${p.q}</p>`+p.o.map(o=>`<button onclick="checkEscapeChoice('${o}')">${o}</button>`).join("")}else levelComplete(level<3?'advanceEscape':null,'🏆 Cyber Escape Room completed!','math')
+function nextEscape(){let qs=escapeLevels[level-1];if(escapeQ<qs.length){let p=qs[escapeQ];if(p.type==="input")area().innerHTML=`<div class="level">LEVEL ${level}</div><h2>🔐 Cyber Escape Room</h2><p>${p.q}</p><input id="ans"><button onclick="checkEscapeInput()">Submit</button>`;else area().innerHTML=`<div class="level">LEVEL ${level}</div><h2>🔐 Cyber Escape Room</h2><p>${p.q}</p>`+p.o.map(o=>`<button onclick="checkEscapeChoice('${o}')">${o}</button>`).join("")}else levelComplete(level<3?'advanceEscape':null,'🏆 Cyber Escape Room completed!','math');}
 function checkEscapeInput(){feedback(document.getElementById("ans").value.trim()===escapeLevels[level-1][escapeQ].a);escapeQ++;setTimeout(nextEscape,500)}
 function checkEscapeChoice(a){feedback(a===escapeLevels[level-1][escapeQ].a);escapeQ++;setTimeout(nextEscape,500)}
 function advanceEscape(){level++;escapeQ=0;nextEscape()}
