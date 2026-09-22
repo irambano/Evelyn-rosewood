@@ -1,60 +1,169 @@
-<!doctype html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Cyber Runner</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Runner - Laptop Optimized</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#06101c;color:#fff;font-family:Arial,sans-serif;touch-action:none}
-canvas{display:block;width:100%;height:100%}#hud{position:fixed;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;z-index:3;font-weight:bold}
-.p{background:#09213acc;border:1px solid #38ddff66;border-radius:20px;padding:8px 11px}
-#start,#end{position:fixed;inset:0;z-index:10;display:grid;place-items:center;background:#050b16eF;text-align:center;padding:20px}
-.box{max-width:520px;padding:28px;border:1px solid #39ddff66;border-radius:24px;background:#091827;box-shadow:0 0 60px #00cfff22}
-h1{color:#58edff;font-size:clamp(34px,9vw,58px);margin:5px 0}p{line-height:1.5;color:#c9d8e5}
-button{border:1px solid #49e5ff77;background:#103654;color:white;border-radius:14px;padding:13px 18px;font-weight:bold;font-size:16px}
-#controls{position:fixed;bottom:16px;left:16px;right:16px;z-index:5;display:flex;justify-content:space-between}
-.pad{display:grid;grid-template-columns:55px 55px 55px;grid-template-rows:55px 55px;gap:6px}.c{width:55px;height:55px;padding:0;background:#0d2a45dd;font-size:22px}.u{grid-column:2}.l{grid-column:1;grid-row:2}.d{grid-column:2;grid-row:2}.r{grid-column:3;grid-row:2}
-.hidden{display:none!important}
-</style></head><body>
-<div id="hud"><div class="p">❤️ <span id="hp">100</span></div><div class="p">💾 <span id="chips">0</span>/5</div><div class="p">⭐ <span id="score">0</span></div></div>
-<canvas id="c"></canvas>
-<div id="start"><div class="box"><div style="font-size:60px">🧑‍💻⚡</div><h1>CYBER RUNNER</h1><p>Collect 5 encrypted data chips, hack the terminal, then escape through the portal. Security bots are slow, but they are persistent. 🤖</p><p>Use WASD/arrow keys or the touch controls.</p><button onclick="begin()">▶ PLAY</button></div></div>
-<div id="end" class="hidden"><div class="box"><div id="ei" style="font-size:60px">🏆</div><h1 id="et">MISSION COMPLETE</h1><p id="ed"></p><button onclick="begin()">🔄 PLAY AGAIN</button></div></div>
-<div id="controls"><div class="pad">
-<button class="c u" data-k="u" aria-label="Up">▲</button>
-<button class="c l" data-k="l" aria-label="Left">◀</button>
-<button class="c d" data-k="d" aria-label="Down">▼</button>
-<button class="c r" data-k="r" aria-label="Right">▶</button>
-</div></div>
-<script>
-const cv=document.getElementById('c'),x=cv.getContext('2d');let W,H,D,run=false,last=0,score=0,hp=100,got=0,hack=false;
-const k={u:0,d:0,l:0,r:0};let p,bots,chips,walls,term,exit;
-function setKey(key,on){k[key]=on}
-function bindControls(){
- document.querySelectorAll('[data-k]').forEach(b=>{
-   const key=b.dataset.k;
-   const down=e=>{e.preventDefault();e.stopPropagation();setKey(key,1);b.setPointerCapture?.(e.pointerId)};
-   const up=e=>{e.preventDefault();e.stopPropagation();setKey(key,0)};
-   b.addEventListener('pointerdown',down,{passive:false});
-   b.addEventListener('pointerup',up,{passive:false});
-   b.addEventListener('pointercancel',up,{passive:false});
-   b.addEventListener('lostpointercapture',up,{passive:false});
- });
-}
-bindControls();
-function size(){D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;x.setTransform(D,0,0,D,0,0)}addEventListener('resize',size);size();
-function begin(){Object.keys(k).forEach(q=>k[q]=0);document.getElementById('start').classList.add('hidden');document.getElementById('end').classList.add('hidden');score=0;hp=100;got=0;hack=false;p={x:70,y:H-90,r:16,s:210};chips=[[W*.22,H*.22],[W*.47,H*.18],[W*.75,H*.27],[W*.29,H*.58],[W*.68,H*.68]].map(q=>({x:q[0],y:q[1],r:10}));bots=[{x:W*.8,y:H*.2,r:17,s:42},{x:W*.52,y:H*.5,r:17,s:36}];walls=[{x:W*.15,y:H*.38,w:W*.25,h:18},{x:W*.57,y:H*.42,w:W*.27,h:18},{x:W*.42,y:H*.67,w:18,h:H*.2}];term={x:W*.86,y:H*.52,r:25};exit={x:55,y:75,r:24};run=true;last=performance.now();requestAnimationFrame(loop)}
-function hitRect(o,nx,ny){if(nx<o.r||nx>W-o.r||ny<o.r+42||ny>H-o.r)return true;let q={x:nx,y:ny,r:o.r};return walls.some(r=>{let a=Math.max(r.x,Math.min(q.x,r.x+r.w)),b=Math.max(r.y,Math.min(q.y,r.y+r.h));return Math.hypot(q.x-a,q.y-b)<q.r})}
-function move(dt){let dx=k.r-k.l,dy=k.d-k.u;if(!dx&&!dy)return;let z=Math.hypot(dx,dy);dx/=z;dy/=z;let nx=p.x+dx*p.s*dt,ny=p.y+dy*p.s*dt;if(!hitRect(p,nx,p.y))p.x=nx;if(!hitRect(p,p.x,ny))p.y=ny}
-function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
-function update(dt){move(dt);chips=chips.filter(q=>{if(dist(p,q)<p.r+q.r){got++;score+=100;return false}return true});
-bots.forEach(b=>{let d=dist(p,b);if(d<300){let a=Math.atan2(p.y-b.y,p.x-b.x),s=b.s*(d<150?1.15:.75),nx=b.x+Math.cos(a)*s*dt,ny=b.y+Math.sin(a)*s*dt;if(!hitRect(b,nx,b.y))b.x=nx;if(!hitRect(b,b.x,ny))b.y=ny}if(d<p.r+b.r)hp-=25*dt});
-if(got===5&&dist(p,term)<75&&hack){term.done=true;score+=500}
-if(term.done&&dist(p,exit)<50){run=false;finish(true)}if(hp<=0){run=false;finish(false)}
-document.getElementById('hp').textContent=Math.max(0,Math.ceil(hp));document.getElementById('chips').textContent=got;document.getElementById('score').textContent=score}
-function draw(){x.fillStyle='#06101c';x.fillRect(0,0,W,H);x.strokeStyle='#123047';for(let a=0;a<W;a+=32){x.beginPath();x.moveTo(a,45);x.lineTo(a,H);x.stroke()}for(let a=45;a<H;a+=32){x.beginPath();x.moveTo(0,a);x.lineTo(W,a);x.stroke()}walls.forEach(r=>{x.fillStyle='#102b42';x.fillRect(r.x,r.y,r.w,r.h)});chips.forEach(q=>{x.fillStyle='#55edff';x.shadowBlur=18;x.shadowColor='#00d9ff';x.fillRect(q.x-9,q.y-9,18,18);x.shadowBlur=0});x.fillStyle=term.done?'#24c77a':'#9b4de8';x.beginPath();x.arc(term.x,term.y,term.r,0,7);x.fill();x.font='22px Arial';x.textAlign='center';x.textBaseline='middle';x.fillText(term.done?'✓':'🔐',term.x,term.y);x.fillStyle=term.done?'#25d98b':'#344455';x.beginPath();x.arc(exit.x,exit.y,exit.r,0,7);x.fill();x.fillStyle='#fff';x.fillText('🚪',exit.x,exit.y);bots.forEach(b=>{x.fillStyle='#ff3158';x.beginPath();x.arc(b.x,b.y,b.r,0,7);x.fill();x.fillStyle='#fff';x.fillText('⚠',b.x,b.y)});x.fillStyle='#58edff';x.shadowBlur=18;x.shadowColor='#00d9ff';x.beginPath();x.arc(p.x,p.y,p.r,0,7);x.fill();x.shadowBlur=0;x.fillText('🧑‍💻',p.x,p.y)}
-function loop(t){if(!run)return;let dt=Math.min(.035,(t-last)/1000);last=t;update(dt);draw();requestAnimationFrame(loop)}
-function finish(win){document.getElementById('end').classList.remove('hidden');document.getElementById('ei').textContent=win?'🏆':'💥';document.getElementById('et').textContent=win?'NETWORK SAVED!':'SYSTEM BREACHED';document.getElementById('ed').textContent=win?'You hacked the terminal and escaped with '+score+' points! 🛡️':'The bots caught you. Final score: '+score+'. Try again!'}
-addEventListener('keydown',e=>{let a=e.key.toLowerCase();if(a==='w'||a==='arrowup')k.u=1;if(a==='s'||a==='arrowdown')k.d=1;if(a==='a'||a==='arrowleft')k.l=1;if(a==='d'||a==='arrowright')k.r=1;if(a==='h')hack=true});
-addEventListener('blur',()=>Object.keys(k).forEach(q=>k[q]=0));
-addEventListener('pointercancel',()=>Object.keys(k).forEach(q=>k[q]=0));
-addEventListener('keyup',e=>{let a=e.key.toLowerCase();if(a==='w'||a==='arrowup')k.u=0;if(a==='s'||a==='arrowdown')k.d=0;if(a==='a'||a==='arrowleft')k.l=0;if(a==='d'||a==='arrowright')k.r=0;if(a==='h')hack=false});
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden}
+body{background:#0d1117;color:#58a6ff;font-family:"Courier New",monospace;display:flex;justify-content:center;align-items:center}
+#game-container{width:min(96vw,900px);text-align:center}
+h1{color:#00ff66;text-shadow:0 0 10px rgba(0,255,102,.5);margin:4px 0 8px;font-size:clamp(1.3rem,3vw,1.8rem)}
+.stats{display:flex;justify-content:space-around;align-items:center;background:#161b22;padding:8px;border-radius:6px;border:1px solid #30363d;margin-bottom:8px;font-weight:bold;font-size:clamp(.75rem,2vw,1rem)}
+canvas{display:block;width:100%;height:auto;max-height:70vh;aspect-ratio:800/500;background:#000;border:2px solid #00ff66;border-radius:4px;box-shadow:0 0 20px rgba(0,255,102,.2);touch-action:none}
+.instructions{margin-top:7px;color:#8b949e;font-size:clamp(.65rem,1.8vw,.9rem)}
+.btn{background:#238636;color:#fff;border:none;padding:9px 18px;font-size:1rem;border-radius:6px;cursor:pointer;margin-top:10px;font-weight:bold}
+.btn:hover{background:#2ea043}
+@media (max-height:650px){h1{margin:2px 0 4px;font-size:1.3rem}.stats{padding:5px;margin-bottom:5px}canvas{max-height:62vh}.instructions{margin-top:4px}.btn{margin-top:5px;padding:7px 15px}}
+</style>
+</head>
+<body>
+<div id="game-container">
+<h1>CYBER RUNNER</h1>
+<div class="stats">
+<div>❤️ HP: <span id="hp">100</span></div>
+<div>💾 CHIPS: <span id="chips">0</span>/5</div>
+<div>⭐ SCORE: <span id="score">0</span></div>
+</div>
+<canvas id="gameCanvas" width="800" height="500"></canvas>
+<div class="instructions">💻 WASD / Arrow Keys — Collect 5 chips → Hack terminal → Escape portal</div>
+<button class="btn" id="actionBtn" onclick="startGame()">▶ PLAY</button>
+</div>
 
-</script></body></html>
+<script>
+const canvas=document.getElementById("gameCanvas");
+const ctx=canvas.getContext("2d");
+const hpEl=document.getElementById("hp");
+const chipsEl=document.getElementById("chips");
+const scoreEl=document.getElementById("score");
+const actionBtn=document.getElementById("actionBtn");
+
+let gameActive=false,player,bots,chips,portal,terminal,lastTime=0;
+const keys={};
+
+class Player{
+ constructor(){this.x=50;this.y=250;this.radius=12;this.speed=5.2;this.hp=100;this.chipsCollected=0;this.terminalHacked=false}
+ draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);ctx.fillStyle="#00ff66";ctx.shadowBlur=12;ctx.shadowColor="#00ff66";ctx.fill();ctx.shadowBlur=0}
+ update(dt){
+  let dx=0,dy=0;
+  if(keys.w||keys.arrowup)dy--;
+  if(keys.s||keys.arrowdown)dy++;
+  if(keys.a||keys.arrowleft)dx--;
+  if(keys.d||keys.arrowright)dx++;
+  if(dx||dy){const len=Math.hypot(dx,dy);this.x+=dx/len*this.speed*60*dt;this.y+=dy/len*this.speed*60*dt}
+  this.x=Math.max(this.radius,Math.min(canvas.width-this.radius,this.x));
+  this.y=Math.max(this.radius,Math.min(canvas.height-this.radius,this.y));
+ }
+}
+
+class Bot{
+ constructor(x,y,speed){this.x=x;this.y=y;this.radius=10;this.speed=speed}
+ draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);ctx.fillStyle="#ff3333";ctx.shadowBlur=14;ctx.shadowColor="#ff3333";ctx.fill();ctx.shadowBlur=0}
+ update(tx,ty,dt){
+  const dx=tx-this.x,dy=ty-this.y,d=Math.hypot(dx,dy);
+  if(d>0){this.x+=dx/d*this.speed*60*dt;this.y+=dy/d*this.speed*60*dt}
+ }
+}
+
+class Item{
+ constructor(x,y,type){this.x=x;this.y=y;this.size=15;this.type=type;this.active=true}
+ draw(){
+  if(!this.active)return;
+  const color=this.type==="chip"?"#00e1ff":this.type==="terminal"?"#ffcc00":"#cc00ff";
+  ctx.fillStyle=color;ctx.shadowBlur=10;ctx.shadowColor=color;
+  ctx.fillRect(this.x-this.size/2,this.y-this.size/2,this.size,this.size);ctx.shadowBlur=0;
+ }
+}
+
+window.addEventListener("keydown",e=>{
+ const key=e.key.toLowerCase();keys[key]=true;
+ if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(key))e.preventDefault();
+},{passive:false});
+window.addEventListener("keyup",e=>{keys[e.key.toLowerCase()]=false});
+window.addEventListener("blur",()=>Object.keys(keys).forEach(k=>keys[k]=false));
+
+function checkCollision(a,b){
+ const dx=a.x-b.x,dy=a.y-b.y;
+ const ra=a.radius!==undefined?a.radius:a.size/2;
+ const rb=b.radius!==undefined?b.radius:b.size/2;
+ return Math.hypot(dx,dy)<ra+rb;
+}
+
+function initGame(){
+ player=new Player();
+ bots=[new Bot(700,80,6.0),new Bot(700,420,6.5),new Bot(450,450,7.0)];
+ chips=[];
+ for(let i=0;i<5;i++)chips.push(new Item(120+Math.random()*560,50+Math.random()*400,"chip"));
+ terminal=new Item(700,250,"terminal");
+ portal=new Item(50,80,"portal");
+ portal.active=false;
+ hpEl.innerText="100";chipsEl.innerText="0";scoreEl.innerText="0";
+}
+
+function startGame(){
+ if(gameActive)return;
+ initGame();
+ gameActive=true;
+ actionBtn.style.display="none";
+ lastTime=performance.now();
+ requestAnimationFrame(gameLoop);
+}
+
+function gameOver(victory=false){
+ gameActive=false;
+ actionBtn.style.display="inline-block";
+ actionBtn.innerText="🔄 PLAY AGAIN";
+ ctx.fillStyle="rgba(0,0,0,.88)";
+ ctx.fillRect(0,0,canvas.width,canvas.height);
+ ctx.font="bold 30px Courier New";
+ ctx.textAlign="center";
+ ctx.fillStyle=victory?"#00ff66":"#ff3333";
+ ctx.fillText(victory?"MISSION COMPLETE ✔":"SYSTEM OVERRIDE - YOU DIED",canvas.width/2,canvas.height/2);
+}
+
+function gameLoop(now){
+ if(!gameActive)return;
+ const dt=Math.min(0.033,(now-lastTime)/1000);lastTime=now;
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ player.update(dt);player.draw();
+
+ chips.forEach(chip=>{
+  if(chip.active&&checkCollision(player,chip)){
+   chip.active=false;player.chipsCollected++;
+   chipsEl.innerText=player.chipsCollected;
+   scoreEl.innerText=player.chipsCollected*200;
+  }
+  chip.draw();
+ });
+
+ if(player.chipsCollected===5){
+  terminal.draw();
+  if(checkCollision(player,terminal)&&!player.terminalHacked){
+   player.terminalHacked=true;portal.active=true;terminal.active=false;
+  }
+ }
+
+ if(portal.active){
+  portal.draw();
+  if(checkCollision(player,portal)){gameOver(true);return}
+ }
+
+ for(const bot of bots){
+  bot.update(player.x,player.y,dt);bot.draw();
+  if(checkCollision(player,bot)){
+   player.hp-=1.8*60*dt;
+   hpEl.innerText=Math.max(0,Math.floor(player.hp));
+   if(player.hp<=0){gameOver(false);return}
+  }
+ }
+
+ requestAnimationFrame(gameLoop);
+}
+
+ctx.fillStyle="#161b22";ctx.fillRect(0,0,canvas.width,canvas.height);
+ctx.font="20px Courier New";ctx.fillStyle="#58a6ff";ctx.textAlign="center";
+ctx.fillText("SYSTEM READY. PRESS PLAY TO INITIALIZE.",canvas.width/2,canvas.height/2);
+</script>
+</body>
+</html>
