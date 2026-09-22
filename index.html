@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Cyber Runner: Neon Escape</title>
+<title>Cyber Runner: Neon Escape 💚</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
-body{background:#070b14;color:#dff;font-family:"Courier New",monospace;display:flex;align-items:center;justify-content:center}
+body{background:radial-gradient(circle at 20% 10%,#15263d 0,#070b14 42%,#04060c 100%);color:#dff;font-family:"Courier New",monospace;display:flex;align-items:center;justify-content:center}
 #game{width:min(96vw,920px);text-align:center}
-h1{margin:3px 0 6px;color:#52ffc0;text-shadow:0 0 12px #1f8;font-size:clamp(1.2rem,3vw,1.8rem)}
+h1{margin:3px 0 6px;color:#8affd1;text-shadow:0 0 12px #1f8;font-size:clamp(1.2rem,3vw,1.8rem)}
 #hud{display:flex;gap:6px;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap}
-.stat{background:#111a28;border:1px solid #284052;border-radius:7px;padding:6px 9px;font-weight:bold;font-size:clamp(.68rem,1.8vw,.9rem);flex:1;min-width:90px}
+.stat{background:linear-gradient(135deg,#142238,#0d1726);border:1px solid #284052;border-radius:7px;padding:6px 9px;font-weight:bold;font-size:clamp(.68rem,1.8vw,.9rem);flex:1;min-width:90px}
 #wrap{position:relative;width:100%;border:2px solid #52ffc0;border-radius:6px;overflow:hidden;box-shadow:0 0 24px #1f8a33}
 canvas{display:block;width:100%;height:auto;background:#050812;aspect-ratio:16/9}
 #tip{color:#91a6b8;font-size:clamp(.65rem,1.7vw,.85rem);margin:6px 0}
@@ -25,8 +25,8 @@ button:hover{background:#20a861}
 <div id="game">
 <h1>⚡ CYBER RUNNER: NEON ESCAPE ⚡</h1>
 <div id="hud">
-<div class="stat">❤️ HP <span id="hp">100</span></div>
-<div class="stat">💾 DATA <span id="data">0</span>/5</div>
+<div class="stat">💚 HP <span id="hp">100</span></div>
+<div class="stat">🌸 DATA <span id="data">0</span>/5</div>
 <div class="stat">⭐ SCORE <span id="score">0</span></div>
 <div class="stat">🚀 BOOST <span id="boost">READY</span></div>
 <div class="stat">🌃 SECTOR <span id="sector">1</span></div>
@@ -35,8 +35,8 @@ button:hover{background:#20a861}
 <canvas id="c" width="960" height="540"></canvas>
 <div id="overlay">
 <div class="card">
-<div style="font-size:52px">🧑‍💻⚡🤖</div>
-<h2 id="title">NEON ESCAPE</h2>
+<div style="font-size:52px;filter:drop-shadow(0 0 10px #52ffc0)">🧑‍💻💚✨</div>
+<h2 id="title">NEON ESCAPE ✨</h2>
 <p id="message">Steal 5 data cores, grab power-ups, survive the hunter bots, hack the terminal, and reach the extraction portal.</p>
 <p><b>WASD / Arrow Keys</b> move • <b>SPACE</b> dash • Collect all data → hack terminal → escape</p>
 <button id="play">▶ START MISSION</button>
@@ -56,7 +56,7 @@ const rnd=(a,b)=>a+Math.random()*(b-a);
 const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 
 class Player{
- constructor(){this.x=70;this.y=H-70;this.r=13;this.hp=100;this.speed=225;this.shield=0;this.boost=0;this.dash=0;this.dashCd=0;this.inv=0;this.data=0}
+ constructor(){this.x=70;this.y=H-70;this.r=13;this.hp=100;this.maxHp=100;this.speed=225;this.hitCooldown=0;this.shield=0;this.boost=0;this.dash=0;this.dashCd=0;this.inv=0;this.data=0}
  update(dt){
   let x=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);
   let y=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
@@ -64,10 +64,10 @@ class Player{
   let speed=this.speed*(this.boost>0?1.7:1);
   if(keys.space&&this.dashCd<=0&&this.dash<=0){this.dash=.18;this.dashCd=1.15;this.inv=.28;burst(this.x,this.y,"#52ffc0",20)}
   if(this.dash>0){speed=850;this.dash-=dt}
-  this.dashCd=Math.max(0,this.dashCd-dt);this.boost=Math.max(0,this.boost-dt);this.inv=Math.max(0,this.inv-dt);
+  this.dashCd=Math.max(0,this.dashCd-dt);this.hitCooldown=Math.max(0,this.hitCooldown-dt);this.boost=Math.max(0,this.boost-dt);this.inv=Math.max(0,this.inv-dt);
   this.x=clamp(this.x+x*speed*dt,this.r,W-this.r);this.y=clamp(this.y+y*speed*dt,45+this.r,H-this.r);
  }
- draw(){glow("#52ffc0",this.x,this.y,this.r);ctx.fillStyle="#52ffc0";ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,7);ctx.fill();ctx.fillStyle="#06101a";ctx.font="14px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("◆",this.x,this.y)}
+ draw(){glow("#52ffc0",this.x,this.y,this.r);ctx.fillStyle="#52ffc0";ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,7);ctx.fill();ctx.fillStyle="#06101a";ctx.font="14px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("♡",this.x,this.y)}
 }
 
 class Bot{
@@ -77,7 +77,7 @@ class Bot{
   let dd=d(this,player),a=Math.atan2(player.y-this.y,player.x-this.x);
   let speed=this.s*(dd<260?1.18:.68);
   this.x+=Math.cos(a)*speed*dt;this.y+=Math.sin(a)*speed*dt;
-  if(dd<this.r+player.r&&player.inv<=0){if(player.shield>0)player.shield=Math.max(0,player.shield-22*dt);else player.hp-=24*dt;player.inv=.08;burst(player.x,player.y,"#ff4d68",2)}
+  if(dd<this.r+player.r&&player.hitCooldown<=0){if(player.shield>0){player.shield=Math.max(0,player.shield-35);burst(player.x,player.y,"#55aaff",10)}else{player.hp=Math.max(0,player.hp-12);burst(player.x,player.y,"#ff4d68",10)}player.hitCooldown=.35;player.inv=.18}
  }
  draw(){glow("#ff4264",this.x,this.y,this.r);ctx.fillStyle="#ff4264";ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,7);ctx.fill();ctx.fillStyle="#200";ctx.font="13px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("!",this.x,this.y)}
 }
@@ -97,7 +97,7 @@ function newSector(){
  portal={x:rnd(80,180),y:rnd(70,150),r:27,active:false};
  bots=[];
  for(let i=0;i<sector+2;i++){let side=Math.random()<.5?70:890;bots.push(new Bot(side,rnd(80,470),125+sector*17+i*8))}
- player.x=70;player.y=H-70;player.hp=Math.min(100,player.hp+20);score+=500;
+ player.x=70;player.y=H-70;player.hp=Math.min(player.maxHp,player.hp+20);score+=500;
  $("sector").textContent=sector;
 }
 
@@ -115,7 +115,7 @@ function finish(win){
 
 function collect(){
  cores=cores.filter(q=>{if(dist(player,q)<player.r+q.r){player.data++;score+=200;burst(q.x,q.y,"#5cf",12);return false}return true});
- powerups=powerups.filter(q=>{if(dist(player,q)<player.r+q.r){if(q.type==="energy")player.hp=Math.min(100,player.hp+25);if(q.type==="shield")player.shield=100;if(q.type==="boost")player.boost=5;score+=100;burst(q.x,q.y,q.type==="energy"?"#5f6":"#5cf",14);return false}return q.life>0});
+ powerups=powerups.filter(q=>{if(dist(player,q)<player.r+q.r){if(q.type==="energy")player.hp=Math.min(player.maxHp,player.hp+25);if(q.type==="shield")player.shield=100;if(q.type==="boost")player.boost=5;score+=100;burst(q.x,q.y,q.type==="energy"?"#5f6":"#5cf",14);return false}return q.life>0});
  if(player.data>=5&&!terminal.hacked){terminal.active=true;if(dist(player,terminal)<player.r+terminal.r){terminal.hacked=true;portal.active=true;score+=750;burst(terminal.x,terminal.y,"#ffd84d",28)}}
  if(portal.active&&dist(player,portal)<player.r+portal.r){if(sector<3)newSector();else finish(true)}
 }
@@ -124,7 +124,7 @@ function update(dt){
  player.update(dt);collect();powerups.forEach(q=>q.life-=dt);bots.forEach(b=>b.update(dt));
  particles=particles.filter(q=>{q.x+=q.vx*dt;q.y+=q.vy*dt;q.life-=dt;return q.life>0});
  if(player.hp<=0)finish(false);
- $("hp").textContent=Math.ceil(Math.max(0,player.hp));
+ $("hp").textContent=Math.ceil(Math.max(0,player.hp));$("hp").style.color=player.hp<35?"#ff5b70":"#8affd1";
  $("data").textContent=player.data;
  $("score").textContent=score;
  $("boost").textContent=player.boost>0?Math.ceil(player.boost)+"s":player.dashCd<=0?"READY":"CHARGING";
