@@ -89,14 +89,14 @@ function makeCore(){return{x:rnd(110,850),y:rnd(80,475),r:9,spin:rnd(0,7)}}
 function makePower(){let types=["energy","shield","boost"];return{x:rnd(100,850),y:rnd(80,470),r:11,type:types[Math.floor(Math.random()*types.length)],life:12}}
 
 function newSector(){
- sector++;
+ sector=1;
  cores=[];powerups=[];
  for(let i=0;i<5;i++)cores.push(makeCore());
  for(let i=0;i<2;i++)powerups.push(makePower());
  terminal={x:rnd(680,850),y:rnd(130,410),r:25,active:false,hacked:false};
  portal={x:rnd(80,180),y:rnd(70,150),r:27,active:false};
  bots=[];
- for(let i=0;i<sector+2;i++){let side=Math.random()<.5?70:890;bots.push(new Bot(side,rnd(80,470),88+sector*10+i*5))}
+ for(let i=0;i<3;i++){let side=Math.random()<.5?70:890;bots.push(new Bot(side,rnd(80,470),88+sector*10+i*5))}
  player.x=70;player.y=H-70;player.hp=Math.min(player.maxHp,player.hp+20);score+=500;
  $("sector").textContent=sector;
 }
@@ -117,7 +117,7 @@ function collect(){
  cores=cores.filter(q=>{if(dist(player,q)<player.r+q.r){player.data++;score+=200;burst(q.x,q.y,"#5cf",12);return false}return true});
  powerups=powerups.filter(q=>{if(dist(player,q)<player.r+q.r){if(q.type==="energy")player.hp=Math.min(player.maxHp,player.hp+25);if(q.type==="shield")player.shield=100;if(q.type==="boost")player.boost=5;score+=100;burst(q.x,q.y,q.type==="energy"?"#5f6":"#5cf",14);return false}return q.life>0});
  if(player.data>=5&&!terminal.hacked){terminal.active=true;if(dist(player,terminal)<player.r+terminal.r){terminal.hacked=true;portal.active=true;score+=750;burst(terminal.x,terminal.y,"#ffd84d",28)}}
- if(portal.active&&dist(player,portal)<player.r+portal.r){if(sector<3)newSector();else finish(true)}
+ if(portal.active&&dist(player,portal)<player.r+portal.r){finish(true)}
 }
 
 function update(dt){
