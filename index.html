@@ -75,7 +75,7 @@ class Bot{
  update(dt){
   if(this.stun>0){this.stun-=dt;return}
   let dd=d(this,player),a=Math.atan2(player.y-this.y,player.x-this.x);
-  let speed=this.s*(dd<260?1.18:.68);
+  let speed=this.s*(dd<260?1.05:.62);
   this.x+=Math.cos(a)*speed*dt;this.y+=Math.sin(a)*speed*dt;
   if(dd<this.r+player.r&&player.hitCooldown<=0){if(player.shield>0){player.shield=Math.max(0,player.shield-35);burst(player.x,player.y,"#55aaff",10)}else{player.hp=Math.max(0,player.hp-12);burst(player.x,player.y,"#ff4d68",10)}player.hitCooldown=.35;player.inv=.18}
  }
@@ -96,7 +96,7 @@ function newSector(){
  terminal={x:rnd(680,850),y:rnd(130,410),r:25,active:false,hacked:false};
  portal={x:rnd(80,180),y:rnd(70,150),r:27,active:false};
  bots=[];
- for(let i=0;i<sector+2;i++){let side=Math.random()<.5?70:890;bots.push(new Bot(side,rnd(80,470),125+sector*17+i*8))}
+ for(let i=0;i<sector+2;i++){let side=Math.random()<.5?70:890;bots.push(new Bot(side,rnd(80,470),88+sector*10+i*5))}
  player.x=70;player.y=H-70;player.hp=Math.min(player.maxHp,player.hp+20);score+=500;
  $("sector").textContent=sector;
 }
